@@ -68,7 +68,7 @@ jobs:
 
       # Gradle 빌드
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew assemble
 
       # Docker 이미지 빌드
       - name: Build Docker image
