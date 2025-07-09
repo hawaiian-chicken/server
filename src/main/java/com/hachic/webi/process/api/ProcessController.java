@@ -25,7 +25,7 @@ public class ProcessController {
     @Operation(summary = "llm 서버에 html을 전달하고 수정된 html을 받아오는 api")
     @PostMapping()
     public ResponseEntity<ProcessResponse> filterHtml(@RequestBody ProcessRequest request) throws IOException {
-        return ResponseEntity.ok(filteringService.filterHtml(request));
+        return ResponseEntity.ok(filteringService.processHtml(request));
     }
 
 
