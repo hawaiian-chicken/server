@@ -1,14 +1,11 @@
 package com.hachic.webi.dto;
 
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@Getter
-public class WebpageResponse {
+public record WebpageResponse(
 
-    private final String uuid;
-
-    public WebpageResponse(String uuid) {
-
-        this.uuid = uuid;
-    }
-}
+        @Schema(description = "요청 고유 ID")
+        @JsonProperty("uuid")
+        String uuid
+) {}

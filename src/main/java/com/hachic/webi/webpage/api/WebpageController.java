@@ -23,7 +23,7 @@ public class WebpageController {
     @PostMapping
     public ResponseEntity<WebpageResponse> saveWebpage(@RequestBody WebpageRequest webpageRequest) {
 
-        String uuid = webpageService.saveHtml(webpageRequest.getHtml());
+        String uuid = webpageService.saveHtml(webpageRequest.html());
         return ResponseEntity.ok(new WebpageResponse(uuid));
     }
 }
