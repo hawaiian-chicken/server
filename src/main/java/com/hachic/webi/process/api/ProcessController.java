@@ -16,14 +16,14 @@ import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/html")
+@RequestMapping("/process-html")
 @Tag(name = "Process API")
 public class ProcessController {
 
     private final ProcessService filteringService;
 
     @Operation(summary = "llm 서버에 html을 전달하고 수정된 html을 받아오는 api")
-    @PostMapping("/process")
+    @PostMapping()
     public ResponseEntity<ProcessResponse> filterHtml(@RequestBody ProcessRequest request) throws IOException {
         return ResponseEntity.ok(filteringService.filterHtml(request));
     }
