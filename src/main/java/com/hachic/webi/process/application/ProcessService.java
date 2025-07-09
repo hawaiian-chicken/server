@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class ProcessService {
 
-    public ProcessResponse filterHtml(ProcessRequest filteringRequest) throws IOException {
+    public ProcessResponse processHtml(ProcessRequest filteringRequest) throws IOException {
         RestTemplate restTemplate = new RestTemplate();
         String aiServerUrl = "http://ai.webi.click:80/api/process-html";
 
@@ -30,6 +30,7 @@ public class ProcessService {
         // HTML을 JSON으로 감쌈
         Map<String, String> body = new ConcurrentHashMap<>();
         body.put("html", filteringRequest.originalHtml());
+        // TODO: text를 유저의 요구사항으로 변경
         body.put("text", "주민등록등본을 발급받고 싶어");
 
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
@@ -46,8 +47,38 @@ public class ProcessService {
                 .path("modified_html")
                 .asText();
 
+        String message = htmlRootNode
+                .path("data")
+                .path("mesage")
+                .asText();
+
+        // TODO: api 분리
+        sendMessage(filteredHtml, filteringRequest.userId(), message);
+
         return ProcessResponse.of(filteredHtml, filteringRequest.userId());
     }
 
+    private void sendMessage(String filteredHtml, String userId, String message) {
+        RestTemplate restTemplate = new RestTemplate();
+        String socketUrl = "http://chat.webi.click:3000/users/" + userId + "/message";
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, String> body = new ConcurrentHashMap<>();
+        body.put("html", filteredHtml);
+        body.put("user_id", userId);
+        body.put("message", message);
+
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
+
+        if (responseEntity.getStatusCode().is2xxSuccessful()) {
+            System.out.println(responseEntity.getBody());
+        } else {
+            // TODO: 에러처리
+            System.err.println(responseEntity.getBody());
+        }
+    }
 }
+
