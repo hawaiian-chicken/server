@@ -21,24 +21,29 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProcessService {
 
     public ProcessResponse processHtml(ProcessRequest filteringRequest) throws IOException {
-        RestTemplate restTemplate = new RestTemplate();
+
+        // AI 서버 URL tjfwjd
         String aiServerUrl = "http://ai.webi.click:80/api/process-html";
 
+        // 요청 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        // HTML을 JSON으로 감쌈
+        // 요청 본문 구성 (html, text 포함)
         Map<String, String> body = new ConcurrentHashMap<>();
         body.put("html", filteringRequest.originalHtml());
         // TODO: text를 유저의 요구사항으로 변경
         body.put("text", "주민등록등본을 발급받고 싶어");
 
+        // 요청 객체 생성
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
+        // AI 서버에 POST 요청
+        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(aiServerUrl, request, String.class);
         String response = responseEntity.getBody();
 
-        // response 중 filtered Html만 추출
+        //응답에서 modified_html, message 추출
         ObjectMapper htmlMapper = new ObjectMapper();
         JsonNode htmlRootNode = htmlMapper.readTree(response);
 
@@ -49,28 +54,36 @@ public class ProcessService {
 
         String message = htmlRootNode
                 .path("data")
-                .path("mesage")
+                .path("message")
                 .asText();
 
         // TODO: api 분리
+        // 소켓으로 메시지 전송
         sendMessage(filteredHtml, filteringRequest.userId(), message);
 
         return ProcessResponse.of(filteredHtml, filteringRequest.userId());
     }
 
     private void sendMessage(String filteredHtml, String userId, String message) {
-        RestTemplate restTemplate = new RestTemplate();
-        String socketUrl = "http://chat.webi.click:3000/users/" + userId + "/message";
 
+        // 메시지 전송 대상 URL 설정
+        String socketUrl = "http://chat.webi.click:80/users/:userId/message";
+
+        // 요청 헤더 설정 (JSON 형식)
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+        // 요청 본문 구성 (filteredHtml, userId, message 포함)
         Map<String, String> body = new ConcurrentHashMap<>();
         body.put("html", filteredHtml);
         body.put("user_id", userId);
         body.put("message", message);
 
+        // 요청 객체 생성
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+
+        // 소켓 서버에 POST 요청
+        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
 
         if (responseEntity.getStatusCode().is2xxSuccessful()) {

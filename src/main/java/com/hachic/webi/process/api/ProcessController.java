@@ -22,12 +22,10 @@ public class ProcessController {
 
     private final ProcessService filteringService;
 
-    @Operation(summary = "llm 서버에 html을 전달하고 수정된 html을 받아오는 api")
+    @Operation(summary = "요청받은 HTML을 LLM 서버에 전달하고 필터링 결과를 응답으로 반환하는 API")
     @PostMapping()
     public ResponseEntity<ProcessResponse> filterHtml(@RequestBody ProcessRequest request) throws IOException {
         return ResponseEntity.ok(filteringService.processHtml(request));
     }
-
-
 
 }
