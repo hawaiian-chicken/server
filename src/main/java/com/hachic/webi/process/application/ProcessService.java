@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,10 +23,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProcessService {
 
-	public ProcessResponse processHtml(ProcessRequest filteringRequest) throws IOException {
+	// AI 서버 URL 설정
+	@Value("${ai.server.url}")
+	private String aiServerUrl;
 
-		// AI 서버 URL 설정
-		String aiServerUrl = "http://ai.webi.click:80/api/process-html";
+	// 메시지 전송 대상 URL 설정
+	@Value("${socket.url}")
+	private String socketUrl;
+
+	public ProcessResponse processHtml(ProcessRequest filteringRequest) throws IOException {
 
 		// 요청 헤더 설정
 		HttpHeaders headers = new HttpHeaders();
@@ -67,9 +73,6 @@ public class ProcessService {
 	}
 
 	private void sendMessage(String filteredHtml, String userId, String message) {
-
-		// 메시지 전송 대상 URL 설정
-		String socketUrl = "http://chat.webi.click:80/users/:userId/message";
 
 		// 요청 헤더 설정 (JSON 형식)
 		HttpHeaders headers = new HttpHeaders();
