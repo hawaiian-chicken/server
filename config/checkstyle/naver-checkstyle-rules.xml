@@ -420,7 +420,7 @@ The following rules in the Naver coding convention cannot be checked by this con
 	</module>
 
 	<!--- Suppression -->
-	<!-- 예외로 지정할 파일이 있으면 추가
+	<!-- 예외로 지정할 파일이 있을 경우 추가
 	<module name="SuppressionFilter">
 		<property name="file" value="${suppressionFile}"/>
 		<property name="optional" value="true"/>
