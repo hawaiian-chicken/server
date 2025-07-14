@@ -1,4 +1,4 @@
-package com.hachic.webi.domain;
+package com.hachic.webi.webpage.domain;
 
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
@@ -6,6 +6,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 
+/**
+ * 웹 페이지 도메인 엔티티
+ */
 @Document(collection = "webpages")
 public class Webpage {
 
@@ -21,11 +24,15 @@ public class Webpage {
     @Getter
     private long createdAt;
 
+    /**
+     * 웹 페이지 생성자
+     *
+     * @param uuid UUID
+     * @param html HTML 내용
+     */
     public Webpage(String uuid, String html) {
-
         this.uuid = uuid;
         this.html = html;
         this.createdAt = Instant.now().getEpochSecond();
     }
-
 }
