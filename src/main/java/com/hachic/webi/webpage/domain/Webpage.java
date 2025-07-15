@@ -16,7 +16,7 @@ public class Webpage {
     @Id
     private String id;
 
-    private String uuid;
+    private String userId;
 
     private String html;
 
@@ -25,11 +25,11 @@ public class Webpage {
     /**
      * 웹 페이지 생성자
      *
-     * @param uuid UUID
+     * @param userId user_id
      * @param html HTML 내용
      */
-    public Webpage(String uuid, String html) {
-        this.uuid = uuid;
+    public Webpage(String userId, String html) {
+        this.userId = userId;
         this.html = html;
         this.createdAt = Instant.now().getEpochSecond();
     }

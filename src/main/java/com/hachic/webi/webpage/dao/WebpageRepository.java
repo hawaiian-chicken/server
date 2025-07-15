@@ -11,10 +11,10 @@ import java.util.Optional;
 public interface WebpageRepository extends MongoRepository<Webpage, String> {
 
     /**
-     * UUID로 웹페이지를 조회한다.
+     * userId로 웹페이지를 조회한다.
      *
-     * @param uuid UUID
+     * @param userId user_id
      * @return 웹 페이지 Optional
      */
-    Optional<Webpage> findByUuid(String uuid);
+    Optional<Webpage> findByUuid(String userId);
 }

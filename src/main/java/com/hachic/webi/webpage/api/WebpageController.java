@@ -5,6 +5,7 @@ import com.hachic.webi.webpage.dto.WebpageRequest;
 import com.hachic.webi.webpage.dto.WebpageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,15 +32,15 @@ public class WebpageController {
     }
 
     /**
-     * 웹 페이지를 저장하고 UUID를 반환한다.
+     * 웹 페이지를 저장하고 userId를 반환한다.
      *
      * @param webpageRequest 웹 페이지 요청
      * @return 웹 페이지 응답
      */
-    @Operation(summary = "웹페이지 상호작용", description = "html 페이지 저장 후 uuid 반환")
+    @Operation(summary = "웹페이지 상호작용", description = "html 페이지 저장 후 userId 반환")
     @PostMapping
     public ResponseEntity<WebpageResponse> saveWebpage(@Valid @RequestBody WebpageRequest webpageRequest) {
-        String uuid = webpageService.saveHtml(webpageRequest.html());
-        return ResponseEntity.ok(new WebpageResponse(uuid));
+        String userId = webpageService.saveHtml(webpageRequest.html());
+        return ResponseEntity.ok(new WebpageResponse(userId));
     }
 }
