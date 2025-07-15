@@ -14,6 +14,7 @@ import com.hachic.webi.process.dto.ProcessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
@@ -25,12 +26,12 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Process API")
 public class ProcessController {
 
-	private final ProcessService filteringService;
+	private final ProcessService processService;
 
 	@Operation(summary = "요청받은 HTML을 LLM 서버에 전달하고 필터링 결과를 응답으로 반환하는 API")
 	@PostMapping()
-	public ResponseEntity<ProcessResponse> filterHtml(@RequestBody ProcessRequest request) throws IOException {
-		return ResponseEntity.ok(filteringService.processHtml(request));
+	public ResponseEntity<ProcessResponse> filterHtml(@Valid @RequestBody ProcessRequest request) throws IOException {
+		return ResponseEntity.ok(processService.processHtml(request));
 	}
 
 }
