@@ -16,5 +16,5 @@ public interface WebpageRepository extends MongoRepository<Webpage, String> {
      * @param userId user_id
      * @return 웹 페이지 Optional
      */
-    Optional<Webpage> findByUuid(String userId);
+    Optional<Webpage> findByUserId(String userId);
 }
