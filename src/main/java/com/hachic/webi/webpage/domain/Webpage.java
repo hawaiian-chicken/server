@@ -9,19 +9,17 @@ import java.time.Instant;
 /**
  * 웹 페이지 도메인 엔티티
  */
+@Getter
 @Document(collection = "webpages")
 public class Webpage {
 
     @Id
     private String id;
 
-    @Getter
     private String uuid;
 
-    @Getter
     private String html;
 
-    @Getter
     private long createdAt;
 
     /**
