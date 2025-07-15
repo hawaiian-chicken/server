@@ -33,4 +33,13 @@ public class Webpage {
         this.html = html;
         this.createdAt = Instant.now().toEpochMilli();
     }
+
+    /**
+     * UUID 생성 메서드
+     * @param html HTML 내용
+     * @return 생성된 UUID
+     */
+    public static Webpage createUuid(String html) {
+        return new Webpage(java.util.UUID.randomUUID().toString(), html);
+    }
 }

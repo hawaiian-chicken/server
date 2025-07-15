@@ -30,9 +30,8 @@ public class WebpageService {
      * @return userId
      */
     public String saveHtml(String html) {
-        String userId = UUID.randomUUID().toString();
-        Webpage webpage = new Webpage(userId, html);
+        Webpage webpage = Webpage.createUuid(html);
         webpageRepository.save(webpage);
-        return userId;
+        return webpage.getUserId();
     }
 }
