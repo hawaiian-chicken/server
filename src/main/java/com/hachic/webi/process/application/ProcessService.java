@@ -23,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProcessService {
 
+	private final RestTemplate restTemplate;
+
 	// AI 서버 URL 설정
 	@Value("${ai.server.url}")
 	private String aiServerUrl;
@@ -47,7 +49,6 @@ public class ProcessService {
 		HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
 		// AI 서버에 POST 요청
-		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(aiServerUrl, request, String.class);
 		String response = responseEntity.getBody();
 
@@ -88,7 +89,6 @@ public class ProcessService {
 		HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
 		// 소켓 서버에 POST 요청
-		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
 
 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
