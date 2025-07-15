@@ -38,7 +38,7 @@ public class WebpageController {
      */
     @Operation(summary = "웹페이지 상호작용", description = "html 페이지 저장 후 uuid 반환")
     @PostMapping
-    public ResponseEntity<WebpageResponse> saveWebpage(@RequestBody WebpageRequest webpageRequest) {
+    public ResponseEntity<WebpageResponse> saveWebpage(@Valid @RequestBody WebpageRequest webpageRequest) {
         String uuid = webpageService.saveHtml(webpageRequest.html());
         return ResponseEntity.ok(new WebpageResponse(uuid));
     }
