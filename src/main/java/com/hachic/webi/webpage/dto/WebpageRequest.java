@@ -11,4 +11,6 @@ public record WebpageRequest(
 
         @NotNull
         @Schema(description = "원본 HTML")
-        @JsonProperty
+        String html
+) {
+}
