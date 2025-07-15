@@ -31,6 +31,6 @@ public class Webpage {
     public Webpage(String userId, String html) {
         this.userId = userId;
         this.html = html;
-        this.createdAt = Instant.now().getEpochSecond();
+        this.createdAt = Instant.now().toEpochMilli();
     }
 }
