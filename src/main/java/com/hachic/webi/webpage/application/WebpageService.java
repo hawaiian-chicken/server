@@ -24,15 +24,15 @@ public class WebpageService {
     }
 
     /**
-     * HTML을 저장하고 UUID를 반환한다.
+     * HTML을 저장하고 userId를 반환한다.
      *
      * @param html HTML 내용
-     * @return UUID
+     * @return userId
      */
     public String saveHtml(String html) {
-        String uuid = UUID.randomUUID().toString();
-        Webpage webpage = new Webpage(uuid, html);
+        String userId = UUID.randomUUID().toString();
+        Webpage webpage = new Webpage(userId, html);
         webpageRepository.save(webpage);
-        return uuid;
+        return userId;
     }
 }
