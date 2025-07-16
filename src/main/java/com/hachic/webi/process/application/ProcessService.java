@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,16 +15,22 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hachic.webi.process.dao.ProcessResultRepository;
+import com.hachic.webi.process.domain.ProcessResult;
 import com.hachic.webi.process.dto.ProcessRequest;
 import com.hachic.webi.process.dto.ProcessResponse;
+import com.hachic.webi.webpage.dao.WebpageRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@EnableMongoRepositories(basePackages = "com.hachic.webi")
 public class ProcessService {
 
 	private final RestTemplate restTemplate;
+	private final WebpageRepository webpageRepository;
+	private final ProcessResultRepository processResultRepository;
 
 	// AI 서버 URL 설정
 	@Value("${ai.server.url}")
@@ -33,17 +40,28 @@ public class ProcessService {
 	@Value("${socket.url}")
 	private String socketUrl;
 
+	/**
+	 * 원본 html을 ai 서버로 보낸 후 응답을 몽고DB에 저장하고 소켓으로 메시지를 전송합니다
+	 * @param filteringRequest webpage uuid, user id
+	 * @return 수정된 html과 요청한 user id
+	 * @throws IOException
+	 */
 	public ProcessResponse processHtml(ProcessRequest filteringRequest) throws IOException {
 
 		// 요청 헤더 설정
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
+		// TODO: custom error 생성
+		String originalHtml = webpageRepository
+				.findHtmlByUserId(filteringRequest.webpageUuid()).orElseThrow().html();
+
 		// 요청 본문 구성 (html, text 포함)
 		Map<String, String> body = new ConcurrentHashMap<>();
-		body.put("html", filteringRequest.originalHtml());
+		body.put("html", originalHtml);
 		// TODO: text를 유저의 요구사항으로 변경
-		body.put("text", "주민등록등본을 발급받고 싶어");
+		String text = "주민등록등본을 발급받고 싶어";
+		body.put("text", text);
 
 		// 요청 객체 생성
 		HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
@@ -54,25 +72,44 @@ public class ProcessService {
 
 		//응답에서 modified_html, message 추출
 		ObjectMapper htmlMapper = new ObjectMapper();
-		JsonNode htmlRootNode = htmlMapper.readTree(response);
+		JsonNode htmlRootNode = htmlMapper.readTree(response).path("data");
 
-		String filteredHtml = htmlRootNode
-				.path("data")
+		String modifiedHtml = htmlRootNode
 				.path("modified_html")
 				.asText();
 
 		String message = htmlRootNode
-				.path("data")
 				.path("message")
 				.asText();
 
+		String requestType = htmlRootNode
+				.path("request_type")
+				.asText();
+
+		// 데이터 저장
+		ProcessResult processResult = new ProcessResult(
+				filteringRequest.userId(),
+				text,
+				filteringRequest.webpageUuid(),
+				requestType,
+				modifiedHtml,
+				message
+		);
+		processResultRepository.save(processResult);
+
 		// TODO: api 분리
 		// 소켓으로 메시지 전송
-		sendMessage(filteredHtml, filteringRequest.userId(), message);
+		sendMessage(modifiedHtml, filteringRequest.userId(), message);
 
-		return ProcessResponse.of(filteredHtml, filteringRequest.userId());
+		return ProcessResponse.of(modifiedHtml, filteringRequest.userId());
 	}
 
+	/**
+	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다.
+	 * @param filteredHtml 수정된 html
+	 * @param userId 유저 id
+	 * @param message ai의 응답 메시지
+	 */
 	private void sendMessage(String filteredHtml, String userId, String message) {
 
 		// 요청 헤더 설정 (JSON 형식)
