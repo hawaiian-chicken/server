@@ -18,8 +18,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
-
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/process-html")
@@ -30,7 +28,7 @@ public class ProcessController {
 
 	@Operation(summary = "요청받은 HTML을 LLM 서버에 전달하고 필터링 결과를 응답으로 반환하는 API")
 	@PostMapping()
-	public ResponseEntity<ProcessResponse> filterHtml(@Valid @RequestBody ProcessRequest request) throws IOException {
+	public ResponseEntity<ProcessResponse> processHtml(@Valid @RequestBody ProcessRequest request) throws IOException {
 		return ResponseEntity.ok(processService.processHtml(request));
 	}
 
