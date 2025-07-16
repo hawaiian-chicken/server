@@ -5,6 +5,9 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### 코딩 스타일 체크 파일 ###
+/checkstyle/
+
 ### STS ###
 .apt_generated
 .classpath
