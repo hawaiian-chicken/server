@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * RestTemplate을 스프링 빈으로 등록하는 설정 클래스입니다.
+ * RestTemplate을 스프링 빈으로 등록하는 설정 클래스입니다
  */
 @Configuration
 public class RestTemplateConfig {
