@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.http.HttpEntity;
@@ -42,7 +43,7 @@ public class ProcessService {
 
 	/**
 	 * 원본 html을 ai 서버로 보낸 후 응답을 몽고DB에 저장하고 소켓으로 메시지를 전송합니다
-	 * @param filteringRequest webpage uuid, user id
+	 * @param filteringRequest webpage_id, user_id
 	 * @return 수정된 html과 요청한 user id
 	 * @throws IOException
 	 */
@@ -54,7 +55,7 @@ public class ProcessService {
 
 		// TODO: custom error 생성
 		String originalHtml = webpageRepository
-				.findHtmlByUserId(filteringRequest.webpageUuid()).orElseThrow().html();
+				.findHtmlById(toObejctId(filteringRequest.webpageId())).orElseThrow().html();
 
 		// 요청 본문 구성 (html, text 포함)
 		Map<String, String> body = new ConcurrentHashMap<>();
@@ -90,7 +91,7 @@ public class ProcessService {
 		ProcessResult processResult = new ProcessResult(
 				filteringRequest.userId(),
 				text,
-				filteringRequest.webpageUuid(),
+				toObejctId(filteringRequest.webpageId()),
 				requestType,
 				modifiedHtml,
 				message
@@ -134,6 +135,10 @@ public class ProcessService {
 			// TODO: 에러처리
 			System.err.println(responseEntity.getBody());
 		}
+	}
+
+	private ObjectId toObejctId(String id) {
+		return new ObjectId(id);
 	}
 }
 
