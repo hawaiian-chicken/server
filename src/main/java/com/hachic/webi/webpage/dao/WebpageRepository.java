@@ -23,11 +23,11 @@ public interface WebpageRepository extends MongoRepository<Webpage, String> {
 	Optional<Webpage> findByUserId(String userId);
 
 	/**
-	 * userId로 해당되는 웹페이지의 html을 가져온다
-	 * {'_id': ?0}: _id필드가 첫 번째 매개변수와 같은 문서를 찾아라
-	 * {'html': 1}: 1->포함, 0->제외, html필드만 조회해라
-	 * @param id webpage_id
-	 * @return 웹 페이지의 html Optional
+	 * userId로 해당되는 웹페이지의 html을 가져옵니다
+	 * {'_id': ?0}: _id 필드가 첫 번째 매개변수와 일치하는 문서를 찾습니다
+	 * {'html': 1}: html 필드만 포함하여 조회합니다 (1: 포함, 0: 제외)
+	 * @param id 웹페이지의 ID (webpage_id)
+	 * @return 웹페이지의 HTML을 담은 Optional 객체
 	 */
 	@Query(value = "{'_id': ?0}", fields = "{'html': 1, '_id': 0}")
 	Optional<HtmlDto> findHtmlById(ObjectId id);

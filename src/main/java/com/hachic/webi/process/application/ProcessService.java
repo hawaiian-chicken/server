@@ -106,7 +106,7 @@ public class ProcessService {
 	}
 
 	/**
-	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다.
+	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다
 	 * @param filteredHtml 수정된 html
 	 * @param userId 유저 id
 	 * @param message ai의 응답 메시지
@@ -137,6 +137,11 @@ public class ProcessService {
 		}
 	}
 
+	/**
+	 * String 타입의 id를 ObjectId타입으로 바꿉니다
+	 * @param id String 타입의 id
+	 * @return ObjectId 타입의 id
+	 */
 	private ObjectId toObejctId(String id) {
 		return new ObjectId(id);
 	}
