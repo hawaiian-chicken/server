@@ -4,6 +4,7 @@ import com.hachic.webi.webpage.dao.WebpageRepository;
 import com.hachic.webi.webpage.domain.Webpage;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -29,9 +30,13 @@ public class WebpageService {
      * @param html HTML 내용
      * @return userId
      */
-    public String saveHtml(String html) {
-        Webpage webpage = Webpage.createUuid(html);
+    public String saveHtml(String html, String userId) {
+
+        Optional<Webpage> existWebpage = webpageRepository.findByUserId(userId);
+
+        Webpage webpage = new Webpage(userId, html);
         webpageRepository.save(webpage);
-        return webpage.getUserId();
+
+        return userId;
     }
 }

@@ -40,7 +40,7 @@ public class WebpageController {
     @Operation(summary = "웹페이지 상호작용", description = "html 페이지 저장 후 userId 반환")
     @PostMapping
     public ResponseEntity<WebpageResponse> saveWebpage(@Valid @RequestBody WebpageRequest webpageRequest) {
-        String userId = webpageService.saveHtml(webpageRequest.html());
+        String userId = webpageService.saveHtml(webpageRequest.html(), webpageRequest.userId());
         return ResponseEntity.ok(new WebpageResponse(userId));
     }
 }
