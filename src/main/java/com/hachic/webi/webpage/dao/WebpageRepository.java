@@ -12,11 +12,11 @@ import com.hachic.webi.webpage.domain.Webpage;
  */
 public interface WebpageRepository extends MongoRepository<Webpage, ObjectId> {
 
-	/**
-	 * userId로 웹페이지를 조회한다.
-	 *
-	 * @param userId user_id
-	 * @return 웹 페이지 Optional
-	 */
-	Optional<Webpage> findByUserId(String userId);
+    /**
+     * userId로 웹페이지를 조회한다.
+     *
+     * @param userId user_id
+     * @return 웹 페이지 Optional
+     */
+    Optional<Webpage> findByUserId(String userId);
 }
