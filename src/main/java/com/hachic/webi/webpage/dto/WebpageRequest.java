@@ -1,5 +1,7 @@
 package com.hachic.webi.webpage.dto;
 
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
@@ -8,11 +10,12 @@ import jakarta.validation.constraints.NotNull;
  */
 public record WebpageRequest(
 
-        @NotNull
-        @Schema(description = "원본 HTML")
-        String html,
+		@NotNull
+		@Schema(description = "원본 HTML")
+		String html,
 
-        @NotNull
-        String userId
+		@NotNull
+		@Field("user_id")
+		String userId
 ) {
 }
