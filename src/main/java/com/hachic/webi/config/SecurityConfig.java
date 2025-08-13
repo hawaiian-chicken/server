@@ -1,11 +1,16 @@
 package com.hachic.webi.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -15,15 +20,8 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.authorizeHttpRequests(authorizeRequests -> authorizeRequests
-						// 소셜 로그인 엔드포인트는 접근 허용
-						.requestMatchers(
-								"/swagger-ui/index.html",
-								"/auth/google",
-								"/auth/kakao",
-								"/auth/naver",
-								"/auth/google/callback",
-								"/auth/kakao/callback",
-								"/auth/naver/callback").permitAll()
+						// 소셜 로그인 엔드포인트와 swagger는 접근 허용
+						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						// 나머지 요청은 인증 요구
 						.anyRequest().authenticated()
 				)
@@ -35,5 +33,18 @@ public class SecurityConfig {
 				.csrf(AbstractHttpConfigurer::disable);
 
 		return http.build();
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowedOrigins(List.of("http://localhost:8080")); // Swagger UI URL 허용
+		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+		config.setAllowedHeaders(List.of("*"));
+		config.setAllowCredentials(true);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
 	}
 }
