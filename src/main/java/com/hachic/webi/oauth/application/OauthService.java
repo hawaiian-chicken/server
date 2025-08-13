@@ -37,7 +37,7 @@ public class OauthService {
 	 */
 	public String request(SocialLoginType socialLoginType) {
 		SocialOauth socialOauth = this.findSocialOauthByType(socialLoginType);
-		return  socialOauth.getOauthRedirectUrl();
+		return socialOauth.getOauthRedirectUrl();
 	}
 
 	/**
