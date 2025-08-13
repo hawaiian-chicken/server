@@ -1,9 +1,9 @@
-package com.hachic.webi.oauth.service.social;
+package com.hachic.webi.oauth.application.social;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class GoogleOauth implements SocialOauth {
+public class KakaoOauth implements SocialOauth {
 	@Override
 	public String getOauthRedirectUrl() {
 		return "";
