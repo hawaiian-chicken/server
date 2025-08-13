@@ -16,7 +16,14 @@ public class SecurityConfig {
 		http
 				.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 						// 소셜 로그인 엔드포인트는 접근 허용
-						.requestMatchers("/auth/google", "/auth/kakao", "/auth/naver").permitAll()
+						.requestMatchers(
+								"/swagger-ui/index.html",
+								"/auth/google",
+								"/auth/kakao",
+								"/auth/naver",
+								"/auth/google/callback",
+								"/auth/kakao/callback",
+								"/auth/naver/callback").permitAll()
 						// 나머지 요청은 인증 요구
 						.anyRequest().authenticated()
 				)

@@ -11,9 +11,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import lombok.RequiredArgsConstructor;
@@ -51,15 +56,21 @@ public class NaverOauth implements SocialOauth {
 	public String requestAccessToken(String code) {
 		RestTemplate restTemplate = new RestTemplate();
 
-		Map<String, Object> params = new HashMap<>();
-		params.put("code", code);
-		params.put("client_id", naverSnsClientId);
-		params.put("client_secret", naverSnsClientSecret);
-		params.put("redirect_uri", naverSnsCallbackUrl);
-		params.put("grant_type", "authorization_code");
-		params.put("state", "random_state_string"); // 앞서 전송한 state 값과 일치해야 함
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-		ResponseEntity<String> responseEntity = restTemplate.postForEntity(naverSnsTokenBaseUrl, params, String.class);
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("code", code);
+		params.add("client_id", naverSnsClientId);
+		params.add("client_secret", naverSnsClientSecret);
+		params.add("redirect_uri", naverSnsCallbackUrl);
+		params.add("grant_type", "authorization_code");
+		params.add("state", "random_state_string"); // 앞서 전송한 state 값과 일치해야 함
+
+		// HttpEntity에 헤더와 파라미터를 함께 담음
+		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(naverSnsTokenBaseUrl, request, String.class);
 
 		if (responseEntity.getStatusCode() == HttpStatus.OK) {
 			String tokenResponse = responseEntity.getBody();
@@ -78,16 +89,18 @@ public class NaverOauth implements SocialOauth {
 			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 			connection.setDoOutput(true);
 
-			Map<String, Object> params = new HashMap<>();
-			params.put("code", code);
-			params.put("client_id", naverSnsClientId);
-			params.put("client_secret", naverSnsClientSecret);
-			params.put("redirect_uri", naverSnsCallbackUrl);
-			params.put("grant_type", "authorization_code");
-			params.put("state", "random_state_string");
+			MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+			params.add("code", code);
+			params.add("client_id", naverSnsClientId);
+			params.add("client_secret", naverSnsClientSecret);
+			params.add("redirect_uri", naverSnsCallbackUrl);
+			params.add("grant_type", "authorization_code");
+			params.add("state", "random_state_string"); // 앞서 전송한 state 값과 일치해야 함
 
+			// 파라미터 문자열 생성 시 value가 리스트이므로 flatMap 사용
 			String parameterString = params.entrySet().stream()
-					.map(x -> x.getKey() + '=' + x.getValue())
+					.flatMap(entry -> entry.getValue().stream()
+									.map(value -> entry.getKey() + "=" + value))
 					.collect(Collectors.joining("&"));
 
 			BufferedOutputStream bous = new BufferedOutputStream(connection.getOutputStream());
