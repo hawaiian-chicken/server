@@ -74,7 +74,7 @@ public class ProcessService {
 
 		//응답에서 modified_html, message 추출
 		ObjectMapper htmlMapper = new ObjectMapper();
-		JsonNode htmlRootNode = htmlMapper.readTree(response).path("data").path("data");
+		JsonNode htmlRootNode = htmlMapper.readTree(response).path("data");
 
 		JsonNode actionsNode = htmlRootNode.path("actions");
 		List<Actions> actions = new ArrayList<>();
