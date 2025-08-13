@@ -107,7 +107,7 @@ public class ProcessService {
 		// 소켓으로 메시지 전송
 		sendMessage(actions, aiMessage);
 
-		return ProcessResponse.of(actions, filteringRequest.userId());
+		return ProcessResponse.of(actions, filteringRequest.userId(), aiMessage);
 	}
 
 	/**
