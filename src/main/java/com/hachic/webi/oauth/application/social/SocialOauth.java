@@ -1,4 +1,4 @@
-package com.hachic.webi.oauth.service.social;
+package com.hachic.webi.oauth.application.social;
 
 import com.hachic.webi.oauth.helper.constants.SocialLoginType;
 
