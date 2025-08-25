@@ -1,11 +1,5 @@
 package com.hachic.webi.oauth.application.social;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -79,54 +73,5 @@ public class NaverOauth implements SocialOauth {
 			return responseEntity.getBody();
 		}
 		return "NAVER 로그인 요청 처리 실패";
-	}
-
-	public String requestAccessTokenUsingUrl(String code) {
-		try {
-			URL url = new URL(naverSnsTokenBaseUrl);
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("POST");
-			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			connection.setDoOutput(true);
-
-			MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-			params.add("code", code);
-			params.add("client_id", naverSnsClientId);
-			params.add("client_secret", naverSnsClientSecret);
-			params.add("redirect_uri", naverSnsCallbackUrl);
-			params.add("grant_type", "authorization_code");
-			params.add("state", "random_state_string"); // 앞서 전송한 state 값과 일치해야 함
-
-			// 파라미터 문자열 생성 시 value가 리스트이므로 flatMap 사용
-			String parameterString = params.entrySet().stream()
-					.flatMap(entry -> entry.getValue().stream()
-									.map(value -> entry.getKey() + "=" + value))
-					.collect(Collectors.joining("&"));
-
-			BufferedOutputStream bous = new BufferedOutputStream(connection.getOutputStream());
-			bous.write(parameterString.getBytes());
-			bous.flush();
-			bous.close();
-
-			BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-			StringBuilder sb = new StringBuilder();
-			String line;
-
-			while ((line = br.readLine()) != null) {
-				sb.append(line);
-			}
-
-			if (connection.getResponseCode() == 200) {
-				String tokenResponse = sb.toString();
-				System.out.println("Received Access Token: " + tokenResponse);
-
-				return tokenResponse;
-			}
-			return "NAVER 로그인 요청 처리 실패";
-		} catch (IOException e) {
-			throw new IllegalArgumentException(
-					"알 수 없는 NAVER 로그인 Access Token 요청 URL 입니다 :: " + naverSnsTokenBaseUrl);
-		}
 	}
 }
