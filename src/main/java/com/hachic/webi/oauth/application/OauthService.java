@@ -74,12 +74,10 @@ public class OauthService {
 
 	public User requestAccessTokenAndSaveUser(SocialLoginType socialLoginType, String code)
 			throws JsonProcessingException {
-		System.out.println("Social Login Type & code : " + socialLoginType + " \n & \n" + code + "\n********");
-
+		logger.info("Social Login Type & code : {} \n & \n{} \n********", socialLoginType, code);
 		// 1. Access Token을 포함한 JSON 응답 요청
 		String accessTokenJson = this.requestAccessToken(socialLoginType, code);
-		System.out.println("\n Access Token Json : " + accessTokenJson + "\n********");
-
+		logger.info("\n Access Token Json : {} \n********", accessTokenJson);
 		// 2. JSON에서 Access Token만 추출
 		String accessToken = extractAccessTokenFromJson(accessTokenJson);
 
