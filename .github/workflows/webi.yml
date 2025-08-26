@@ -104,7 +104,11 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/spring-webi:latest
             docker stop spring-webi-container || true
             docker rm spring-webi-container || true
-            docker run -d -p 80:8080 --name spring-webi-container ${{ secrets.DOCKER_USERNAME }}/spring-webi:latest
+            docker run -d -p 80:8080 \
+              -e NAVER_CLIENT_ID="${{ secrets.NAVER_CLIENT_ID }}" \
+              -e NAVER_CLIENT_SECRET="${{ secrets.NAVER_CLIENT_SECRET }}" \
+              --name spring-webi-container \
+              ${{ secrets.DOCKER_USERNAME }}/spring-webi:latest
 
       # ③ SSH 허용 규칙 해제
       - name: Revoke SSH rule
