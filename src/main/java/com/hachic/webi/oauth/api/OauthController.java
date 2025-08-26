@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hachic.webi.oauth.application.OauthService;
-import com.hachic.webi.oauth.domain.User;
+import com.hachic.webi.oauth.dto.UserResponse;
 import com.hachic.webi.oauth.helper.constants.SocialLoginType;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,16 +47,16 @@ public class OauthController {
 			operationId = "handleSocialLoginCallback"
 	)
 	@GetMapping("/{socialLoginType}/callback")
-	public ResponseEntity<String> callback(
+	public ResponseEntity<?> callback(
 			@PathVariable(name = "socialLoginType") SocialLoginType socialLoginType,
 			@RequestParam(name = "code") String code) throws JsonProcessingException {
 		log.info(">> 소셜 로그인 API 서버로부터 받은 code :: {}", code);
 
 		// 액세스 토큰을 받아온 후 사용자 정보를 DB에 저장
-		User user = oauthService.requestAccessTokenAndSaveUser(socialLoginType, code);
+		UserResponse user = oauthService.requestAccessTokenAndSaveUser(socialLoginType, code);
 		if (user != null) {
-			log.info(">> 사용자 정보 DB 저장 완료:: {}", user.getName());
-			return ResponseEntity.ok("로그인 성공, 사용자 정보 저장 완료");
+			log.info(">> 사용자 정보 DB 저장 완료:: {}", user.name());
+			return ResponseEntity.ok(user);
 		} else {
 			log.error(">> 사용자 정보 저장 실패");
 			return ResponseEntity.status(500).body("사용자 정보 저장 실패");
