@@ -21,7 +21,7 @@ public class SecurityConfig {
 		http
 				.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 						// 소셜 로그인 엔드포인트와 swagger는 접근 허용
-						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/docs/**").permitAll()
 						// 나머지 요청은 인증 요구
 						.anyRequest().authenticated()
 				)
@@ -38,7 +38,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of("http://localhost:8080")); // Swagger UI URL 허용
+		config.setAllowedOrigins(List.of("http://localhost:8080"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowCredentials(true);
