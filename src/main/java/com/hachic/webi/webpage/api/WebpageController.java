@@ -44,7 +44,10 @@ public class WebpageController {
 	@PostMapping
 	public ResponseEntity<WebpageResponse> saveWebpage(@Valid @RequestBody WebpageRequest webpageRequest) {
 		Webpage savedWebpage = webpageService.saveHtml(webpageRequest.html(), webpageRequest.userId());
-		return ResponseEntity.ok(new WebpageResponse(savedWebpage.getUserId(), savedWebpage.getId().toHexString()));
+
+		// from 메서드로 DTO 생성
+		WebpageResponse webpageResponse = WebpageResponse.from(savedWebpage);
+
+		return ResponseEntity.ok(webpageResponse);
 	}
 }
-
