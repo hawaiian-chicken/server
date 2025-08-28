@@ -25,18 +25,19 @@ public class WebpageService {
 	}
 
 	/**
-	 * HTML을 저장하고 userId를 반환한다.
+	 * HTML을 저장하고 Webpage 객체를 반환한다.
 	 *
 	 * @param html HTML 내용
-	 * @return userId
+	 * @param userId 사용자 ID
+	 * @return 저장된 웹 페이지 객체
 	 */
-	public String saveHtml(String html, String userId) {
+	public Webpage saveHtml(String html, String userId) {
 
 		Optional<Webpage> existWebpage = webpageRepository.findByUserId(userId);
 
 		Webpage webpage = new Webpage(userId, html);
-		webpageRepository.save(webpage);
 
-		return userId;
+		return webpageRepository.save(webpage);
 	}
 }
+

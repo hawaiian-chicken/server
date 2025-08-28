@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hachic.webi.webpage.application.WebpageService;
+import com.hachic.webi.webpage.domain.Webpage;
 import com.hachic.webi.webpage.dto.WebpageRequest;
 import com.hachic.webi.webpage.dto.WebpageResponse;
 
@@ -39,10 +40,11 @@ public class WebpageController {
 	 * @param webpageRequest 웹 페이지 요청
 	 * @return 웹 페이지 응답
 	 */
-	@Operation(summary = "웹페이지 상호작용", description = "html 페이지 저장 후 userId 반환")
+	@Operation(summary = "웹페이지 상호작용", description = "html 페이지 저장 후 userId와 webpageId 반환")
 	@PostMapping
 	public ResponseEntity<WebpageResponse> saveWebpage(@Valid @RequestBody WebpageRequest webpageRequest) {
-		String userId = webpageService.saveHtml(webpageRequest.html(), webpageRequest.userId());
-		return ResponseEntity.ok(new WebpageResponse(userId));
+		Webpage savedWebpage = webpageService.saveHtml(webpageRequest.html(), webpageRequest.userId());
+		return ResponseEntity.ok(new WebpageResponse(savedWebpage.getUserId(), savedWebpage.getId().toHexString()));
 	}
 }
+
