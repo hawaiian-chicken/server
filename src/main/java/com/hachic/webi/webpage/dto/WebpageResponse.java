@@ -11,6 +11,11 @@ public record WebpageResponse(
 
 		@Schema(description = "요청 고유 ID")
 		@JsonProperty("user_id")
-		String userId
+		String userId,
+
+		@Schema(description = "웹 페이지 ID")
+		@JsonProperty("webpage_id")
+		String webpageId
+
 ) {
 }
