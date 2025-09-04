@@ -1,54 +1,56 @@
 package com.hachic.webi.config;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.hachic.webi.auth.security.JwtAuthFilter;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-	@Value("${api.server.url}")
-	private String apiServerUrl;
+	private final JwtAuthFilter jwtAuthFilter;
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http
-				.authorizeHttpRequests(authorizeRequests -> authorizeRequests
-						// 소셜 로그인 엔드포인트와 swagger는 접근 허용
-						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/docs/**").permitAll()
-						// 나머지 요청은 인증 요구
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.csrf(AbstractHttpConfigurer::disable)
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(
+								"/auth/**",
+								"/swagger-ui/**",
+								"/v3/api-docs/**",
+								"/docs/**").permitAll()
 						.anyRequest().authenticated()
 				)
-				.formLogin(formLogin -> formLogin
-						// 로그인 페이지는 모든 사용자에게 허용됨
-						.loginPage("/login").permitAll()
-				)
-				// CSRF 보호 비활성화 -> 개발 중에만 사용
-				.csrf(AbstractHttpConfigurer::disable);
-
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of(apiServerUrl));
-		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-		config.setAllowedHeaders(List.of("*"));
-		config.setAllowCredentials(true);
-
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		configuration.setAllowedHeaders(Arrays.asList("*"));
+		configuration.setAllowCredentials(true);
+		configuration.setMaxAge(3600L);
+		
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", config);
+		source.registerCorsConfiguration("/**", configuration);
 		return source;
 	}
 }

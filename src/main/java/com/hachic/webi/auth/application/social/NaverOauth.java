@@ -1,13 +1,11 @@
-package com.hachic.webi.oauth.application.social;
+package com.hachic.webi.auth.application.social;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -32,46 +30,41 @@ public class NaverOauth implements SocialOauth {
 	private String naverSnsTokenBaseUrl;
 
 	@Override
-	public String getOauthRedirectUrl() {
-		Map<String, Object> params = new HashMap<>();
-		params.put("response_type", "code");
-		params.put("client_id", naverSnsClientId);
-		params.put("redirect_uri", naverSnsCallbackUrl);
-		params.put("state", "random_state_string"); // CSRF 방지
-
-		String parameterString = params.entrySet().stream()
-				.map(x -> x.getKey() + "=" + x.getValue())
-				.collect(Collectors.joining("&"));
-
-		return naverSnsBaseUrl + "?" + parameterString;
+	public String getOauthRedirectUrl(String state) {
+		return naverSnsBaseUrl
+				+ "?response_type=code"
+				+ "&client_id=" + naverSnsClientId
+				+ "&redirect_uri=" + naverSnsCallbackUrl
+				+ "&state=" + state;
 	}
 
 	@Override
-	public String requestAccessToken(String code) {
+	public String requestAccessToken(String code, String state) {
 		RestTemplate restTemplate = new RestTemplate();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		params.add("code", code);
 		params.add("client_id", naverSnsClientId);
 		params.add("client_secret", naverSnsClientSecret);
 		params.add("redirect_uri", naverSnsCallbackUrl);
 		params.add("grant_type", "authorization_code");
-		params.add("state", "random_state_string"); // 앞서 전송한 state 값과 일치해야 함
+		params.add("code", code);
+		params.add("state", state); // 앞서 전송한 state 값과 일치해야 함
 
 		// HttpEntity에 헤더와 파라미터를 함께 담음
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(naverSnsTokenBaseUrl, request, String.class);
 
-		if (responseEntity.getStatusCode() == HttpStatus.OK) {
-			String tokenResponse = responseEntity.getBody();
-			System.out.println(tokenResponse);
-
+		if (responseEntity.getStatusCode().is2xxSuccessful()) {
 			return responseEntity.getBody();
 		}
-		return "NAVER 로그인 요청 처리 실패";
+		throw new IllegalStateException(
+				"Naver token exchange failed " + responseEntity.getStatusCode() + " " + responseEntity.getBody());
+	}
+
+	private static String enc(String str) {
+		return URLEncoder.encode(str, StandardCharsets.UTF_8);
 	}
 }

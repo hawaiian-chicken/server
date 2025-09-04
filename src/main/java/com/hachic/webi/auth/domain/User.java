@@ -1,4 +1,4 @@
-package com.hachic.webi.oauth.domain;
+package com.hachic.webi.auth.domain;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Document(collection = "users")
@@ -26,9 +25,8 @@ public class User {
 
 	private final String provider;
 
-	@Field("access_token")
-	@Setter
-	private String accessToken;
+	@Field("email")
+	private final String email;
 
 	@Field("created_at")
 	@CreatedDate
@@ -42,10 +40,10 @@ public class User {
 			String socialId,
 			String name,
 			String provider,
-			String accessToken) {
+			String email) {
 		this.socialId = socialId;
 		this.name = name;
 		this.provider = provider;
-		this.accessToken = accessToken;
+		this.email = email;
 	}
 }

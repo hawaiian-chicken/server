@@ -1,9 +1,9 @@
-package com.hachic.webi.oauth.helper.converter;
+package com.hachic.webi.auth.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 
-import com.hachic.webi.oauth.helper.constants.SocialLoginType;
+import com.hachic.webi.auth.domain.SocialLoginType;
 
 @Configuration
 public class SocialLoginTypeConverter implements Converter<String, SocialLoginType> {

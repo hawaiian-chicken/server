@@ -1,4 +1,4 @@
-package com.hachic.webi.oauth.application;
+package com.hachic.webi.auth.application;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hachic.webi.oauth.application.social.SocialOauth;
-import com.hachic.webi.oauth.dao.UserRepository;
-import com.hachic.webi.oauth.domain.User;
-import com.hachic.webi.oauth.dto.UserResponse;
-import com.hachic.webi.oauth.helper.constants.SocialLoginType;
+import com.hachic.webi.auth.application.social.SocialOauth;
+import com.hachic.webi.auth.dao.UserRepository;
+import com.hachic.webi.auth.domain.User;
+import com.hachic.webi.auth.dto.UserResponse;
+import com.hachic.webi.auth.domain.SocialLoginType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,9 +36,9 @@ public class OauthService {
 	 * @param socialLoginType 소셜 로그인 타입
 	 * @return 소셜 로그인 요청 URL 반환
 	 */
-	public String request(SocialLoginType socialLoginType) {
+	public String request(SocialLoginType socialLoginType, String state) {
 		SocialOauth socialOauth = this.findSocialOauthByType(socialLoginType);
-		return socialOauth.getOauthRedirectUrl();
+		return socialOauth.getOauthRedirectUrl(state);
 	}
 
 	/**
@@ -47,9 +47,9 @@ public class OauthService {
 	 * @param code authorization code
 	 * @return 발급받은 액세스 토큰 반환
 	 */
-	public String requestAccessToken(SocialLoginType socialLoginType, String code) {
+	public String requestAccessToken(SocialLoginType socialLoginType, String code, String state) {
 		SocialOauth socialOauth = this.findSocialOauthByType(socialLoginType);
-		return socialOauth.requestAccessToken(code);
+		return socialOauth.requestAccessToken(code, state);
 	}
 
 	/**
@@ -73,11 +73,11 @@ public class OauthService {
 		}
 	}
 
-	public UserResponse requestAccessTokenAndSaveUser(SocialLoginType socialLoginType, String code)
+	public UserResponse requestAccessTokenAndSaveUser(SocialLoginType socialLoginType, String code, String state)
 			throws JsonProcessingException {
 		logger.info("Social Login Type & code : {} \n & \n{} \n********", socialLoginType, code);
 		// 1. Access Token을 포함한 JSON 응답 요청
-		String accessTokenJson = this.requestAccessToken(socialLoginType, code);
+		String accessTokenJson = this.requestAccessToken(socialLoginType, code, state);
 		logger.info("\n Access Token Json : {} \n********", accessTokenJson);
 		// 2. JSON에서 Access Token만 추출
 		String accessToken = extractAccessTokenFromJson(accessTokenJson);
@@ -99,13 +99,11 @@ public class OauthService {
 		Optional<User> existingUser = userRepository.findBySocialId(user.getSocialId());
 		if (existingUser.isPresent()) {
 			User existing = existingUser.get();
-			existing.setAccessToken(user.getAccessToken()); // AccessToken 갱신
-			userRepository.save(existing);
-			return UserResponse.of(existing.getName(), existing.getAccessToken(), existing.getProvider());
+			return UserResponse.of(existing.getName(), existing.getSocialId(), existing.getProvider());
 		} else {
 			// 신규 사용자 저장
 			userRepository.save(user);
-			return UserResponse.of(user.getName(), user.getAccessToken(), user.getProvider());
+			return UserResponse.of(user.getName(), user.getSocialId(), user.getProvider());
 		}
 	}
 
@@ -153,7 +151,7 @@ public class OauthService {
 				in.close();
 				return response.toString();
 			} else {
-				throw new RuntimeException("Naver API에서 사용자 정보를 가져오는 데 실패했스빈다. 응답 코드: " + responseCode);
+				throw new RuntimeException("Naver API에서 사용자 정보를 가져오는 데 실패했습니다. 응답 코드: " + responseCode);
 			}
 
 		} catch (IOException e) {
