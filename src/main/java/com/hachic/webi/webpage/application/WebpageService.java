@@ -1,7 +1,5 @@
 package com.hachic.webi.webpage.application;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
 import com.hachic.webi.webpage.dao.WebpageRepository;
@@ -33,7 +31,7 @@ public class WebpageService {
 	 */
 	public Webpage saveHtml(String html, String userId) {
 
-		Optional<Webpage> existWebpage = webpageRepository.findByUserId(userId);
+//		Optional<Webpage> existWebpage = webpageRepository.findByUserId(userId);
 
 		Webpage webpage = new Webpage(userId, html);
 
