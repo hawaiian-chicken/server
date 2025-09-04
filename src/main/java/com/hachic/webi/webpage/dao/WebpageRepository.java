@@ -20,7 +20,7 @@ public interface WebpageRepository extends MongoRepository<Webpage, String> {
 	 * @param userId user_id
 	 * @return 웹 페이지 Optional
 	 */
-	Optional<Webpage> findByUserId(String userId);
+//	Optional<Webpage> findByUserId(String userId);
 
 	/**
 	 * userId로 해당되는 웹페이지의 html을 가져옵니다
