@@ -102,11 +102,11 @@ public class OauthController {
 				.sameSite("None").maxAge(refreshTtlSec).build();
 
 		// 프론트엔드로 리다이렉트하면서 JWT 토큰을 쿼리 파라미터로 전달
-		String redirectUrl = frontendRedirectUrl + "/auth/callback" + 
-				"?success=true" +
-				"&user=" + user.getName() +
-				"&access_token=" + accessJwtToken +
-				"&refresh_token=" + refreshJwtToken;
+		String redirectUrl = frontendRedirectUrl + "/auth/callback"
+				+ "?success=true"
+				+ "&user=" + user.getName()
+				+ "&access_token=" + accessJwtToken
+				+ "&refresh_token=" + refreshJwtToken;
 
 		return ResponseEntity.status(302)
 				.header(HttpHeaders.SET_COOKIE, accessCookie.toString())

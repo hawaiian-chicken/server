@@ -17,9 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hachic.webi.auth.application.social.SocialOauth;
 import com.hachic.webi.auth.dao.UserRepository;
+import com.hachic.webi.auth.domain.SocialLoginType;
 import com.hachic.webi.auth.domain.User;
 import com.hachic.webi.auth.dto.UserResponse;
-import com.hachic.webi.auth.domain.SocialLoginType;
 
 import lombok.RequiredArgsConstructor;
 
