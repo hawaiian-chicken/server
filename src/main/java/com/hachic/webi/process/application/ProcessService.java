@@ -58,7 +58,7 @@ public class ProcessService {
 
 		// TODO: custom error 생성
 		String originalHtml = webpageRepository
-				.findHtmlById(toObejctId(filteringRequest.webpageId())).orElseThrow().html();
+				.findHtmlById(toObjectId(filteringRequest.webpageId())).orElseThrow().html();
 
 		// 요청 본문 구성 (html, userMessage 포함)
 		Map<String, String> body = new ConcurrentHashMap<>();
@@ -72,7 +72,7 @@ public class ProcessService {
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(aiServerUrl, request, String.class);
 		String response = responseEntity.getBody();
 
-		//응답에서 modified_html, message 추출
+		// 응답에서 actions, message 추출
 		ObjectMapper htmlMapper = new ObjectMapper();
 		JsonNode htmlRootNode = htmlMapper.readTree(response).path("data");
 
@@ -96,7 +96,7 @@ public class ProcessService {
 		ProcessResult processResult = new ProcessResult(
 				filteringRequest.userId(), // 요청 유저 id
 				filteringRequest.userMessage(), // 유저가 요청한 메시지
-				toObejctId(filteringRequest.webpageId()), // 요청한 웹사이트의 id
+				toObjectId(filteringRequest.webpageId()), // 요청한 웹사이트의 id
 				htmlRootNode.path("request_type").asText(), // 유청 요형 (e.g. document_service)
 				//modifiedHtml, // 수정된 html
 				actions,
@@ -144,7 +144,7 @@ public class ProcessService {
 	 * @param id String 타입의 id
 	 * @return ObjectId 타입의 id
 	 */
-	private ObjectId toObejctId(String id) {
+	private ObjectId toObjectId(String id) {
 		return new ObjectId(id);
 	}
 }
