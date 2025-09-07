@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record MessageDetail(
 		@Schema(description = "메시지 ID") @JsonProperty("message_id") String messageId,
-		@Schema(description = "USER or ASSISTANT") Role role,
+		@Schema(description = "USER or AI") Role role,
 		@Schema(description = "메시지 내용") String content,
 		@Schema(description = "메시지 전송 시각") @JsonProperty("created_at") Instant createdAt
 ) {

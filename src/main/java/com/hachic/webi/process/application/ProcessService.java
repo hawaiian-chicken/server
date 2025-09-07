@@ -100,7 +100,7 @@ public class ProcessService {
 				.asText();
 
 		// AI 응답 메시지 저장
-		saveMessage(filteringRequest.conversationId(), userId, Role.ASSISTANT, aiMessage);
+		saveMessage(filteringRequest.conversationId(), userId, Role.AI, aiMessage);
 
 		// 소켓으로 메시지 전송
 		// TODO: chat 404 NOT FOUNT 에러 해결
@@ -143,7 +143,7 @@ public class ProcessService {
 	 * Message Document를 저장하는 메서드
 	 * @param conversationId 채팅방 번호
 	 * @param userId 유저의 social ID
-	 * @param role USER | ASSISTANT
+	 * @param role USER | AI
 	 * @param content 메시지 내용
 	 */
 	private void saveMessage(Long conversationId, String userId, Role role, String content) {
