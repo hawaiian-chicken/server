@@ -29,8 +29,9 @@ public class SecurityConfig {
 								"/swagger-ui/**",
 								"/v3/api-docs/**",
 								"/docs/**",
-								"/chat/**",
-								"/process-html/**").permitAll()
+								"/chat/**", // 테스트 임시 허용
+								"/process-html/**" // 테스트 임시 허용
+						).permitAll()
 						// 나머지 요청은 인증 요구
 						.anyRequest().authenticated()
 				)
