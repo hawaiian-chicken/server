@@ -21,13 +21,13 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/process-html")
-@Tag(name = "Process API")
+@Tag(name = "Process API", description = "요청받은 HTML을 LLM 서버에 전달하고 필터링 결과를 응답으로 반환하는 API")
 public class ProcessController {
 
 	private final ProcessService processService;
 
-	@Operation(summary = "요청받은 HTML을 LLM 서버에 전달하고 필터링 결과를 응답으로 반환하는 API")
 	@PostMapping()
+	@Operation(summary = "요청받은 HTML을 LLM 서버에 전달하고 필터링 결과를 응답으로 반환하는 API")
 	public ResponseEntity<ProcessResponse> processHtml(
 			// @AuthenticationPrincipal OAuth2ResourceServerProperties.Jwt jwt,
 			@Valid @RequestBody ProcessRequest request) throws IOException {
