@@ -152,7 +152,7 @@ public class ProcessService {
 
 		// 채팅방의 첫 대화이면 ai 서버를 통해 title과 tag 추출
 		if (role == Role.USER && conv.getMsgCount() == 0) {
-			// ai 서버에 title과 tag를 추출하는 메서드 호출
+			// TODO: ai 서버에 title과 tag를 추출하는 메서드 호출
 			String title = "title";
 			List<String> tags = new ArrayList<>();
 			tags.add( "tag1");
