@@ -32,7 +32,7 @@ public class ProcessController {
 			// @AuthenticationPrincipal OAuth2ResourceServerProperties.Jwt jwt,
 			@Valid @RequestBody ProcessRequest request) throws IOException {
 		// TODO: 로그인 후 인증된 유저로 변경
-		String userId = "hawaii";
+		String userId = "hachic";
 		return ResponseEntity.ok(processService.processHtml(request, userId));
 	}
 
