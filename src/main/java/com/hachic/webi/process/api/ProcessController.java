@@ -28,8 +28,12 @@ public class ProcessController {
 
 	@Operation(summary = "요청받은 HTML을 LLM 서버에 전달하고 필터링 결과를 응답으로 반환하는 API")
 	@PostMapping()
-	public ResponseEntity<ProcessResponse> processHtml(@Valid @RequestBody ProcessRequest request) throws IOException {
-		return ResponseEntity.ok(processService.processHtml(request));
+	public ResponseEntity<ProcessResponse> processHtml(
+			// @AuthenticationPrincipal OAuth2ResourceServerProperties.Jwt jwt,
+			@Valid @RequestBody ProcessRequest request) throws IOException {
+		// TODO: 로그인 후 인증된 유저로 변경
+		String userId = "hawaii";
+		return ResponseEntity.ok(processService.processHtml(request, userId));
 	}
 
 }

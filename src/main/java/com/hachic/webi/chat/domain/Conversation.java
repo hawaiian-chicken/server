@@ -46,7 +46,7 @@ public class Conversation {
 	 * @param title AI가 정한 conversation의 제목
 	 * @param tags AI가 추출한 conversation의 tag
 	 */
-	public void addInfoByAi(String title, List<String> tags) {
+	public void setTitleAndTags(String title, List<String> tags) {
 		this.title = title;
 		this.tags = tags;
 	}
