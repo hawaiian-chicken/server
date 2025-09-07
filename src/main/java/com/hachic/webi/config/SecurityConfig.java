@@ -25,7 +25,7 @@ public class SecurityConfig {
 		http
 				.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 						// 소셜 로그인 엔드포인트와 swagger는 접근 허용
-						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/docs/**").permitAll()
+						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/docs/**", "/chat/**").permitAll()
 						// 나머지 요청은 인증 요구
 						.anyRequest().authenticated()
 				)

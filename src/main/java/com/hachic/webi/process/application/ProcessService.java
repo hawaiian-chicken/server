@@ -18,6 +18,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hachic.webi.chat.dao.ConversationRepository;
+import com.hachic.webi.chat.dao.MessageRepository;
 import com.hachic.webi.process.dao.ProcessResultRepository;
 import com.hachic.webi.process.domain.ProcessResult;
 import com.hachic.webi.process.dto.Actions;
@@ -35,6 +37,8 @@ public class ProcessService {
 	private final RestTemplate restTemplate;
 	private final WebpageRepository webpageRepository;
 	private final ProcessResultRepository processResultRepository;
+	private final ConversationRepository conversationRepository;
+	private final MessageRepository messageRepository;
 
 	// AI 서버 URL 설정
 	@Value("${ai.server.url}")
