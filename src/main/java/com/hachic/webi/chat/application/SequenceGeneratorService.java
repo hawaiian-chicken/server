@@ -20,7 +20,10 @@ public class SequenceGeneratorService {
 	private final MongoOperations mongoOperations;
 
 	/**
-	 * AutoIncrementSequence의 seq를 자동으로 증가시키는 메서드
+	 * 주어진 seqName의 값을 원자적으로 1 증가시키고 증가된 값을 반환함
+	 * 없을 경우 생성 후 1 반환함
+	 * @param seqName 시퀀스 식별자(_id)
+	 * @return 증가된 시퀀스 값
 	 */
 	public long generateSequence(String seqName) {
 		AutoIncrementSequence counter = mongoOperations.findAndModify(Query.query(
