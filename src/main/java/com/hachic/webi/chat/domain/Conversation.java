@@ -22,12 +22,12 @@ public class Conversation {
 	@Id @Setter
 	private Long id;
 
-	private final String title;
+	private String title;
 
 	@Field("user_id")
 	private final String userId;
 
-	private final List<String> tags;
+	private List<String> tags;
 
 	@Field("msg_count")
 	private int msgCount;
@@ -36,12 +36,18 @@ public class Conversation {
 	@Field("last_message_at")
 	private Instant lastMessageAt;
 
-	public Conversation(String title,
-						String userId,
-						List<String> tags) {
-		this.title = title;
+	public Conversation(String userId) {
 		this.userId = userId;
 		this.msgCount = 0;
+	}
+
+	/**
+	 * conversation에 첫 message를 바탕으로 title과 tag를 등록함
+	 * @param title AI가 정한 conversation의 제목
+	 * @param tags AI가 추출한 conversation의 tag
+	 */
+	public void addInfoByAi(String title, List<String> tags) {
+		this.title = title;
 		this.tags = tags;
 	}
 
