@@ -20,6 +20,10 @@ public class ConversationListener extends AbstractMongoEventListener<Conversatio
 
 	@Override
 	public void onBeforeConvert(BeforeConvertEvent<Conversation> event) {
-		event.getSource().setId(sequenceGenerator.generateSequence(Conversation.SEQUENCE_NAME));
+		Conversation conversation = event.getSource();
+		// ID가 null인 경우에만 새로운 ID 생성 (새로운 conversation 생성 시)
+		if (conversation.getId() == null) {
+			conversation.setId(sequenceGenerator.generateSequence(Conversation.SEQUENCE_NAME));
+		}
 	}
 }

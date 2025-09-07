@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.types.ObjectId;
@@ -20,8 +21,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hachic.webi.chat.dao.ConversationRepository;
 import com.hachic.webi.chat.dao.MessageRepository;
-import com.hachic.webi.process.dao.ProcessResultRepository;
-import com.hachic.webi.process.domain.ProcessResult;
+import com.hachic.webi.chat.domain.Conversation;
+import com.hachic.webi.chat.domain.Message;
+import com.hachic.webi.chat.domain.Role;
 import com.hachic.webi.process.dto.Actions;
 import com.hachic.webi.process.dto.ProcessRequest;
 import com.hachic.webi.process.dto.ProcessResponse;
@@ -36,7 +38,6 @@ public class ProcessService {
 
 	private final RestTemplate restTemplate;
 	private final WebpageRepository webpageRepository;
-	private final ProcessResultRepository processResultRepository;
 	private final ConversationRepository conversationRepository;
 	private final MessageRepository messageRepository;
 
@@ -54,7 +55,10 @@ public class ProcessService {
 	 * @return 수정된 html과 요청한 user id
 	 * @throws IOException
 	 */
-	public ProcessResponse processHtml(ProcessRequest filteringRequest) throws IOException {
+	public ProcessResponse processHtml(ProcessRequest filteringRequest, String userId) throws IOException {
+
+		// 유저가 보낸 메시지 저장
+		saveMessage(filteringRequest.conversationId(), userId, Role.USER, filteringRequest.userMessage());
 
 		// 요청 헤더 설정
 		HttpHeaders headers = new HttpHeaders();
@@ -91,34 +95,25 @@ public class ProcessService {
 				));
 			}
 		}
-
 		String aiMessage = htmlRootNode
 				.path("message")
 				.asText();
 
-		// 데이터 저장
-		ProcessResult processResult = new ProcessResult(
-				filteringRequest.userId(), // 요청 유저 id
-				filteringRequest.userMessage(), // 유저가 요청한 메시지
-				toObjectId(filteringRequest.webpageId()), // 요청한 웹사이트의 id
-				htmlRootNode.path("request_type").asText(), // 유청 요형 (e.g. document_service)
-				//modifiedHtml, // 수정된 html
-				actions,
-				aiMessage
-		);
-		processResultRepository.save(processResult);
+		// AI 응답 메시지 저장
+		saveMessage(filteringRequest.conversationId(), userId, Role.ASSISTANT, aiMessage);
 
 		// 소켓으로 메시지 전송
-		sendMessage(actions, aiMessage);
+		// TODO: chat 404 NOT FOUNT 에러 해결
+		// sendMessage(actions, aiMessage, userId);
 
-		return ProcessResponse.of(actions, filteringRequest.userId(), aiMessage);
+		return ProcessResponse.of(actions, userId, aiMessage);
 	}
 
 	/**
 	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다
 	 * @param actions action, tag, message
 	 */
-	private void sendMessage(List<Actions> actions, String aiMessage) {
+	private void sendMessage(List<Actions> actions, String aiMessage, String userId) {
 
 		// 요청 헤더 설정 (JSON 형식)
 		HttpHeaders headers = new HttpHeaders();
@@ -132,6 +127,7 @@ public class ProcessService {
 		// 요청 객체 생성
 		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
+		socketUrl += "/" + userId + "/message";
 		// 소켓 서버에 POST 요청
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
 
@@ -141,6 +137,40 @@ public class ProcessService {
 			// TODO: 에러처리
 			System.err.println(responseEntity.getBody());
 		}
+	}
+
+	/**
+	 * Message Document를 저장하는 메서드
+	 * @param conversationId 채팅방 번호
+	 * @param userId 유저의 social ID
+	 * @param role USER | ASSISTANT
+	 * @param content 메시지 내용
+	 */
+	private void saveMessage(Long conversationId, String userId, Role role, String content) {
+		Conversation conv = conversationRepository.findById(conversationId)
+				.orElseThrow(NoSuchElementException::new);
+
+		// 채팅방의 첫 대화이면 ai 서버를 통해 title과 tag 추출
+		if (role == Role.USER && conv.getMsgCount() == 0) {
+			// ai 서버에 title과 tag를 추출하는 메서드 호출
+			String title = "title";
+			List<String> tags = new ArrayList<>();
+			tags.add( "tag1");
+			tags.add( "tag2");
+			conv.setTitleAndTags(title, tags);
+			conversationRepository.save(conv);
+		}
+
+		// Message 저장
+		Message msg = new Message(
+				conversationId,
+				userId,
+				role,
+				content
+		);
+		messageRepository.save(msg);
+		conv.addMessage(messageRepository.countByConversationId(conversationId));
+		conversationRepository.save(conv);
 	}
 
 	/**
