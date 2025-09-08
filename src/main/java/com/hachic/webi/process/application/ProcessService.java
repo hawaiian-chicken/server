@@ -155,8 +155,8 @@ public class ProcessService {
 			// TODO: ai 서버에 title과 tag를 추출하는 메서드 호출
 			String title = "title";
 			List<String> tags = new ArrayList<>();
-			tags.add( "tag1");
-			tags.add( "tag2");
+			tags.add("tag1");
+			tags.add("tag2");
 			conv.setTitleAndTags(title, tags);
 			conversationRepository.save(conv);
 		}
