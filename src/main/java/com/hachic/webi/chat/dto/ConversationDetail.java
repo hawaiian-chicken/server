@@ -15,14 +15,6 @@ public record ConversationDetail(
 		@Schema(description = "최근 메시지 전송 시각") @JsonProperty("last_message_at") Instant lastMessageAt,
 		@Schema(description = "채팅방의 메시지 수") @JsonProperty("message_count") int msgCount
 ) {
-	public ConversationDetail(Long id, String title, List<String> tags, Instant lastMessageAt, int msgCount) {
-		this.id = id;
-		this.title = title;
-		this.tags = tags;
-		this.lastMessageAt = lastMessageAt;
-		this.msgCount = msgCount;
-	}
-
 	public static ConversationDetail from(Conversation conversation) {
 		return new ConversationDetail(
 				conversation.getId(),
