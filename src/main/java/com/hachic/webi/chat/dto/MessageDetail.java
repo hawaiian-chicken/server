@@ -14,13 +14,6 @@ public record MessageDetail(
 		@Schema(description = "메시지 내용") String content,
 		@Schema(description = "메시지 전송 시각") @JsonProperty("created_at") Instant createdAt
 ) {
-	public MessageDetail(String messageId, Role role, String content, Instant createdAt) {
-		this.messageId = messageId;
-		this.role = role;
-		this.content = content;
-		this.createdAt = createdAt;
-	}
-
 	public static MessageDetail from(Message message) {
 		return new MessageDetail(
 				message.getId().toString(),
