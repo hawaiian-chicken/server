@@ -12,6 +12,7 @@ jobs:
     env:
       NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
       NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+      KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
     steps:
       # 소스코드 체크아웃
       - name: Checkout source code
@@ -37,6 +38,7 @@ jobs:
     env:
       NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
       NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+      KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
     needs: test
     if: github.event_name == 'push'
     steps:
@@ -107,6 +109,7 @@ jobs:
             docker run -d -p 80:8080 \
               -e NAVER_CLIENT_ID="${{ secrets.NAVER_CLIENT_ID }}" \
               -e NAVER_CLIENT_SECRET="${{ secrets.NAVER_CLIENT_SECRET }}" \
+              -e KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
               --name spring-webi-container \
               ${{ secrets.DOCKER_USERNAME }}/spring-webi:latest
 
