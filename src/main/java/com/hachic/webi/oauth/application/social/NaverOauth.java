@@ -72,6 +72,9 @@ public class NaverOauth implements SocialOauth {
 
 			return responseEntity.getBody();
 		}
-		return "NAVER 로그인 요청 처리 실패";
+		return String.format(
+				"Failed to process Naver login request. Status code: %s, Response Body: %s",
+				responseEntity.getStatusCode(), responseEntity.getBody()
+		);
 	}
 }
