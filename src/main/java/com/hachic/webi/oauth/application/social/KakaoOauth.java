@@ -68,10 +68,13 @@ public class KakaoOauth implements SocialOauth {
 
 		if (responseEntity.getStatusCode() == HttpStatus.OK) {
 			String tokenResponse = responseEntity.getBody();
-			System.out.println("Received Access Token: " + tokenResponse);
+			System.out.println("Received Access Token");
 
 			return responseEntity.getBody();
 		}
-		return "카카오 로그인 요청 처리 실패";
+		return String.format(
+				"Failed to process Kakao login request. Status code: %s, Response Body: %s",
+				responseEntity.getStatusCode(), responseEntity.getBody()
+		);
 	}
 }
