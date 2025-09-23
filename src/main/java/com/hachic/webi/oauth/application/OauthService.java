@@ -129,7 +129,29 @@ public class OauthService {
 
 	// TODO: KAKAO 소셜 로그인 구현
 	private String kakaoApiCall(String accessToken) {
-		return "";
+		try {
+			String url = "https://kapi.kakao.com/v2/user/me";
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			con.setRequestMethod("GET");
+			con.setRequestProperty("Authorization", "Bearer " + accessToken);
+
+			int responseCode = con.getResponseCode();
+			if (responseCode == 200) {
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String inputLine;
+				StringBuffer response = new StringBuffer();
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
+				}
+				in.close();
+				return response.toString();
+			} else {
+				throw new RuntimeException("Kakao API Call Failed : " + responseCode);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Kakao API 호출 중 오류 발생", e);
+		}
 	}
 
 	private String naverApiCall(String accessToken) {
@@ -153,11 +175,11 @@ public class OauthService {
 				in.close();
 				return response.toString();
 			} else {
-				throw new RuntimeException("Naver API에서 사용자 정보를 가져오는 데 실패했스빈다. 응답 코드: " + responseCode);
+				throw new RuntimeException("Naver API에서 사용자 정보를 가져오는 데 실패했습니다. 응답 코드: " + responseCode);
 			}
 
 		} catch (IOException e) {
-			throw new RuntimeException("Naver API 호출 중 오류 발생", e);
+			throw new RuntimeException("Naver API Call Failed", e);
 		}
 	}
 
@@ -181,9 +203,11 @@ public class OauthService {
 			socialId = "google";
 			name = "google";
 		} else if (socialLoginType == SocialLoginType.KAKAO) {
-			// TODO: KAKAO 구현 후 수정
-			socialId = "kakao";
-			name = "kakao";
+			socialId = userInfoJson.path("id").asText();
+			name = userInfoJson
+					.path("kakao_account")
+					.path("profile")
+					.path("nickname").asText();
 		} else if (socialLoginType == SocialLoginType.NAVER) {
 			JsonNode naverResponse = userInfoJson.path("response");
 			socialId = naverResponse.path("id").asText();
