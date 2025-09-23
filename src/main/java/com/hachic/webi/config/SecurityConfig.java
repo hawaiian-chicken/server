@@ -19,6 +19,8 @@ public class SecurityConfig {
 
 	@Value("${api.server.url}")
 	private String apiServerUrl;
+	@Value("${chrome.extension.url}")
+	private String chromeExtensionUrl;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,7 +50,10 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of(apiServerUrl));
+		config.setAllowedOrigins(List.of(
+				apiServerUrl,
+				"http://localhost:3000",
+				chromeExtensionUrl));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowCredentials(true);
