@@ -56,17 +56,34 @@ public class OauthController {
 		log.info(">> 소셜 로그인 API 서버로부터 받은 code :: {}", code);
 
 		// 액세스 토큰을 받아온 후 사용자 정보를 DB에 저장
-		UserInfo user = oauthService.requestAccessTokenAndSaveUser(socialLoginType, code);
+		UserInfo user = null;
+		try {
+			user = oauthService.requestAccessTokenAndSaveUser(socialLoginType, code);
+		} catch (Exception e) {
+			log.error(">> 사용자 정보 저장 중 예외 발생", e);
+		}
 
-		String script = String.format("""
-				<script>
-					localStorage.setItem("accessToken", "%s");
-					localStorage.setItem("name", "%s");
-					localStorage.setItem("provider", "%s");
-					window.location.href = "/login-success";
-				</script>
-				""", user.accessToken(), user.name(), user.provider());
-		response.setContentType("text/html; charset=UTF-8");
-		response.getWriter().write(script);
+		if (user != null) {
+			String script = String.format("""
+					<script>
+						localStorage.setItem("accessToken", "%s");
+						localStorage.setItem("name", "%s");
+						localStorage.setItem("provider", "%s");
+						window.location.href = "/login-success";
+					</script>
+					""", user.accessToken(), user.name(), user.provider());
+			response.setContentType("text/html; charset=UTF-8");
+			response.getWriter().write(script);
+		} else {
+			log.error(">> 사용자 정보 저장 실패");
+			String errorScript = """
+					<script>
+						alert("사용자 정보를 저장하는 데 실패했습니다. 다시 시도해 주세요.");
+						window.location.href = "/home";
+					</script>
+					""";
+			response.setContentType("text/html; charset=UTF-8");
+			response.getWriter().write(errorScript);
+		}
 	}
 }
