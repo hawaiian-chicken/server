@@ -66,9 +66,12 @@ public class OauthController {
 		if (user != null) {
 			String script = String.format("""
 					<script>
-						localStorage.setItem("accessToken", "%s");
-						localStorage.setItem("name", "%s");
-						localStorage.setItem("provider", "%s");
+						window.opener.postMessage({
+							type: "KAKAO_LOGIN_SUCCESS",
+							accessToken: "%s",
+							name: "%s",
+							provider: "%s"
+						}, "*");
 						window.location.href = "/login-success";
 					</script>
 					""", user.accessToken(), user.name(), user.provider());
