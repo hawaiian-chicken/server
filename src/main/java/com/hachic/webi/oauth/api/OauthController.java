@@ -68,13 +68,5 @@ public class OauthController {
 				""", user.accessToken(), user.name(), user.provider());
 		response.setContentType("text/html; charset=UTF-8");
 		response.getWriter().write(script);
-
-//		if (user != null) {
-//			log.info(">> 사용자 정보 DB 저장 완료:: {}", user.name());
-//			//return ResponseEntity.ok(user);
-//		} else {
-//			log.error(">> 사용자 정보 저장 실패");
-//			//return ResponseEntity.status(500).body("사용자 정보 저장 실패");
-//		}
 	}
 }
