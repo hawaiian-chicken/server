@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hachic.webi.config.RabbitMQConfig;
+import com.hachic.webi.config.RabbitMqConfig;
 import com.hachic.webi.process.dao.ProcessResultRepository;
 import com.hachic.webi.process.domain.ProcessResult;
 import com.hachic.webi.process.dto.Actions;
@@ -48,7 +48,7 @@ public class ProcessService {
 	/**
 	 * 원본 html을 ai 서버로 보낸 후 응답을 몽고DB에 저장하고 RabbitMQ로 메시지를 전송합니다
 	 * @param filteringRequest webpage_id, message, user_id
-	 * @throws IOException
+	 * @throws IOException 웹페이지 없는 경우, AI 응답 형식 벗어난 경우
 	 */
 	@SuppressWarnings("checkstyle:LineLength")
 	public void processHtml(ProcessRequest filteringRequest) throws IOException {
@@ -61,7 +61,8 @@ public class ProcessService {
 		// TODO: custom error 생성
 		String originalHtml = webpageRepository
 				.findHtmlById(toObejctId(filteringRequest.webpageId()))
-				.orElseThrow(() -> new IllegalArgumentException("Webpage not found with id: " + filteringRequest.webpageId()))
+				.orElseThrow(() ->
+						new IllegalArgumentException("Webpage not found with id: " + filteringRequest.webpageId()))
 				.html();
 
 		// 요청 본문 구성 (html, userMessage 포함)
@@ -111,7 +112,7 @@ public class ProcessService {
 
 		// 3. RabbitMQ로 응답 전송
 		ProcessResponse finalResponse = ProcessResponse.of(actions, filteringRequest.userId(), aiMessage);
-		rabbitTemplate.convertAndSend(RabbitMQConfig.RESPONSE_QUEUE, finalResponse);
+		rabbitTemplate.convertAndSend(RabbitMqConfig.RESPONSE_QUEUE, finalResponse);
 
 		log.info("Sent response via RabbitMQ for user: {}", filteringRequest.userId());
 	}
