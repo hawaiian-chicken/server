@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import com.rabbitmq.client.ConnectionFactory;
 
 @Configuration
-public class RabbitMQConfig {
+public class RabbitMqConfig {
 
 	public static final String REQUEST_QUEUE = "chat_requests";
 	public static final String RESPONSE_QUEUE = "chat_responses";
