@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hachic.webi.oauth.application.social.SocialOauth;
 import com.hachic.webi.oauth.dao.UserRepository;
 import com.hachic.webi.oauth.domain.User;
-import com.hachic.webi.oauth.dto.UserResponse;
+import com.hachic.webi.oauth.dto.UserInfo;
 import com.hachic.webi.oauth.helper.constants.SocialLoginType;
 
 import lombok.RequiredArgsConstructor;
@@ -73,7 +73,7 @@ public class OauthService {
 		}
 	}
 
-	public UserResponse requestAccessTokenAndSaveUser(SocialLoginType socialLoginType, String code)
+	public UserInfo requestAccessTokenAndSaveUser(SocialLoginType socialLoginType, String code)
 			throws JsonProcessingException {
 		logger.info("Social Login Type & code : {} \n & \n{} \n********", socialLoginType, code);
 		// 1. Access Token을 포함한 JSON 응답 요청
@@ -101,11 +101,11 @@ public class OauthService {
 			User existing = existingUser.get();
 			existing.setAccessToken(user.getAccessToken()); // AccessToken 갱신
 			userRepository.save(existing);
-			return UserResponse.of(existing.getName(), existing.getAccessToken(), existing.getProvider());
+			return UserInfo.of(existing.getName(), existing.getAccessToken(), existing.getProvider());
 		} else {
 			// 신규 사용자 저장
 			userRepository.save(user);
-			return UserResponse.of(user.getName(), user.getAccessToken(), user.getProvider());
+			return UserInfo.of(user.getName(), user.getAccessToken(), user.getProvider());
 		}
 	}
 
