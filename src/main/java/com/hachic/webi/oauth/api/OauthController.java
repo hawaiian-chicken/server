@@ -39,7 +39,7 @@ public class OauthController {
 	)
 	@GetMapping("/login-success")
 	public void loginSuccess(HttpServletResponse response) throws IOException {
-		response.sendRedirect(chromeExtensionUrl + "/dist/loginSuccess.html");
+		response.sendRedirect("/loginSuccess.html");
 	}
 
 	@Operation(
