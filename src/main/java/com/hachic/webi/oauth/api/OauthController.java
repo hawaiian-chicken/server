@@ -3,7 +3,6 @@ package com.hachic.webi.oauth.api;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,12 +47,12 @@ public class OauthController {
 			operationId = "startSocialLogin"
 	)
 	@GetMapping("/{socialLoginType}")
-	public ResponseEntity<String> socialLoginType(
-			@PathVariable(name = "socialLoginType") SocialLoginType socialLoginType) {
+	public void socialLogin(
+			@PathVariable(name = "socialLoginType") SocialLoginType socialLoginType,
+			HttpServletResponse response) throws IOException {
 		log.info(">> 사용자로부터 SNS 로그인 요청을 받음 :: {} Social Login", socialLoginType);
 		String redirectUrl = oauthService.request(socialLoginType);
-
-		return ResponseEntity.ok(redirectUrl);
+		response.sendRedirect(redirectUrl);
 	}
 
 	@Operation(
