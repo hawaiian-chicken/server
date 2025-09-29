@@ -2,6 +2,7 @@ package com.hachic.webi.oauth.api;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +28,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Tag(name = "OAuth", description = "소셜 로그인 인증을 시작하고 콜백을 처리하는 API")
 public class OauthController {
+
+	@Value("${chrome.extension.url}")
+	private String chromeExtensionUrl;
+
 	private final OauthService oauthService;
+
+	@Operation(
+			summary = "로그인 성공 시 프론트 성공 페이지로 리다이렉트"
+	)
+	@GetMapping("/login-success")
+	public void loginSuccess(HttpServletResponse response) throws IOException {
+		response.sendRedirect(chromeExtensionUrl + "/dist/loginSuccess.html");
+	}
 
 	@Operation(
 			summary = "소셜 로그인 프로세스 시작",
@@ -72,7 +85,7 @@ public class OauthController {
 							name: "%s",
 							provider: "%s"
 						}, "*");
-						window.location.href = "/login-success";
+						window.location.href = "/loginSuccess";
 					</script>
 					""", user.accessToken(), user.name(), user.provider());
 			response.setContentType("text/html; charset=UTF-8");
