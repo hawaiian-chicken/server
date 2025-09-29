@@ -85,7 +85,7 @@ public class OauthController {
 							name: "%s",
 							provider: "%s"
 						}, "*");
-						window.location.href = "/loginSuccess";
+						window.location.href = "/loginSuccess.html";
 					</script>
 					""", user.accessToken(), user.name(), user.provider());
 			response.setContentType("text/html; charset=UTF-8");
