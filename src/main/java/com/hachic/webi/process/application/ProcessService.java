@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bson.types.ObjectId;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.http.HttpEntity;
@@ -19,6 +20,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hachic.webi.config.RabbitMqConfig;
+import com.hachic.webi.process.dao.ProcessResultRepository;
+import com.hachic.webi.process.domain.ProcessResult;
 import com.hachic.webi.chat.dao.ConversationRepository;
 import com.hachic.webi.chat.dao.MessageRepository;
 import com.hachic.webi.chat.domain.Conversation;
@@ -30,7 +34,9 @@ import com.hachic.webi.process.dto.ProcessResponse;
 import com.hachic.webi.webpage.dao.WebpageRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @EnableMongoRepositories(basePackages = "com.hachic.webi")
@@ -38,6 +44,8 @@ public class ProcessService {
 
 	private final RestTemplate restTemplate;
 	private final WebpageRepository webpageRepository;
+	private final ProcessResultRepository processResultRepository;
+	private final RabbitTemplate rabbitTemplate;
 	private final ConversationRepository conversationRepository;
 	private final MessageRepository messageRepository;
 
@@ -45,21 +53,24 @@ public class ProcessService {
 	@Value("${ai.server.url}")
 	private String aiServerUrl;
 
-	// 메시지 전송 대상 URL 설정
-	@Value("${socket.url}")
-	private String socketUrl;
-
 	/**
-	 * 원본 html을 ai 서버로 보낸 후 응답을 몽고DB에 저장하고 소켓으로 메시지를 전송합니다
-	 * @param filteringRequest webpage_iqqd, message, user_id
-	 * @return 수정된 html과 요청한 user id
-	 * @throws IOException
+	 * 원본 html을 ai 서버로 보낸 후 응답을 몽고DB에 저장하고 RabbitMQ로 메시지를 전송합니다
+	 * @param filteringRequest webpage_id, message, user_id
+	 * @throws IOException 웹페이지 없는 경우, AI 응답 형식 벗어난 경우
 	 */
-	public ProcessResponse processHtml(ProcessRequest filteringRequest, String userId) throws IOException {
+	@SuppressWarnings("checkstyle:LineLength")
+	public void processHtml(ProcessRequest filteringRequest) throws IOException {
+// 	public ProcessResponse processHtml(ProcessRequest filteringRequest, String userId) throws IOException {
 
+    // conversationId로 userId 조회
+    Conversation conversation = conversationRepository.findById(filteringRequest.conversationId())
+                .orElseThrow(() -> new NoSuchElementException("해당 ID의 채팅방을 찾을 수 없습니다: " + filteringRequest.conversationId()));
+        String userId = conversation.getUserId();
+    
 		// 유저가 보낸 메시지 저장
 		saveMessage(filteringRequest.conversationId(), userId, Role.USER, filteringRequest.userMessage());
 
+		// LLM 서버 요청 및 응답 처리
 		// 요청 헤더 설정
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -102,42 +113,77 @@ public class ProcessService {
 		// AI 응답 메시지 저장
 		saveMessage(filteringRequest.conversationId(), userId, Role.AI, aiMessage);
 
+		// RabbitMQ로 응답 전송
+		ProcessResponse finalResponse = ProcessResponse.of(actions, userId, aiMessage);
+		rabbitTemplate.convertAndSend(RabbitMqConfig.RESPONSE_QUEUE, finalResponse);
+
+		log.info("Sent response via RabbitMQ for user: {}", userId);
+	}
+
+//	/**
+//	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다
+//	 * @param actions action, tag, message
+//	 */
+//	private void sendMessage(List<Actions> actions, String aiMessage) {
+//
+//		// 요청 헤더 설정 (JSON 형식)
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//		// 요청 본문 구성 (actions 안에 action, tag, message 포함)
+//		Map<String, Object> body = new ConcurrentHashMap<>();
+//		body.put("actions", actions);
+//		body.put("message", aiMessage);
+//
+//		// 요청 객체 생성
+//		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+//
+//		// 소켓 서버에 POST 요청
+//		ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
+//
+//		if (responseEntity.getStatusCode().is2xxSuccessful()) {
+//			System.out.println(responseEntity.getBody());
+//		} else {
+//			// TODO: 에러처리
+//			System.err.println(responseEntity.getBody());
+//		}
+//	}
 		// 소켓으로 메시지 전송
 		// TODO: chat 404 NOT FOUNT 에러 해결
 		// sendMessage(actions, aiMessage, userId);
 
-		return ProcessResponse.of(actions, userId, aiMessage);
-	}
+// 		return ProcessResponse.of(actions, userId, aiMessage);
+// 	}
 
-	/**
-	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다
-	 * @param actions action, tag, message
-	 */
-	private void sendMessage(List<Actions> actions, String aiMessage, String userId) {
+// 	/**
+// 	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다
+// 	 * @param actions action, tag, message
+// 	 */
+// 	private void sendMessage(List<Actions> actions, String aiMessage, String userId) {
 
-		// 요청 헤더 설정 (JSON 형식)
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
+// 		// 요청 헤더 설정 (JSON 형식)
+// 		HttpHeaders headers = new HttpHeaders();
+// 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		// 요청 본문 구성 (actions 안에 action, tag, message 포함)
-		Map<String, Object> body = new ConcurrentHashMap<>();
-		body.put("actions", actions);
-		body.put("message", aiMessage);
+// 		// 요청 본문 구성 (actions 안에 action, tag, message 포함)
+// 		Map<String, Object> body = new ConcurrentHashMap<>();
+// 		body.put("actions", actions);
+// 		body.put("message", aiMessage);
 
-		// 요청 객체 생성
-		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+// 		// 요청 객체 생성
+// 		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-		socketUrl += "/" + userId + "/message";
-		// 소켓 서버에 POST 요청
-		ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
+// 		socketUrl += "/" + userId + "/message";
+// 		// 소켓 서버에 POST 요청
+// 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
 
-		if (responseEntity.getStatusCode().is2xxSuccessful()) {
-			System.out.println(responseEntity.getBody());
-		} else {
-			// TODO: 에러처리
-			System.err.println(responseEntity.getBody());
-		}
-	}
+// 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
+// 			System.out.println(responseEntity.getBody());
+// 		} else {
+// 			// TODO: 에러처리
+// 			System.err.println(responseEntity.getBody());
+// 		}
+// 	}
 
 	/**
 	 * Message Document를 저장하는 메서드
@@ -182,4 +228,3 @@ public class ProcessService {
 		return new ObjectId(id);
 	}
 }
-
