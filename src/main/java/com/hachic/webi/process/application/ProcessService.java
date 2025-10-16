@@ -20,14 +20,12 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hachic.webi.config.RabbitMqConfig;
-import com.hachic.webi.process.dao.ProcessResultRepository;
-import com.hachic.webi.process.domain.ProcessResult;
 import com.hachic.webi.chat.dao.ConversationRepository;
 import com.hachic.webi.chat.dao.MessageRepository;
 import com.hachic.webi.chat.domain.Conversation;
 import com.hachic.webi.chat.domain.Message;
 import com.hachic.webi.chat.domain.Role;
+import com.hachic.webi.config.RabbitMqConfig;
 import com.hachic.webi.process.dto.Actions;
 import com.hachic.webi.process.dto.ProcessRequest;
 import com.hachic.webi.process.dto.ProcessResponse;
@@ -44,7 +42,6 @@ public class ProcessService {
 
 	private final RestTemplate restTemplate;
 	private final WebpageRepository webpageRepository;
-	private final ProcessResultRepository processResultRepository;
 	private final RabbitTemplate rabbitTemplate;
 	private final ConversationRepository conversationRepository;
 	private final MessageRepository messageRepository;
@@ -62,11 +59,12 @@ public class ProcessService {
 	public void processHtml(ProcessRequest filteringRequest) throws IOException {
 // 	public ProcessResponse processHtml(ProcessRequest filteringRequest, String userId) throws IOException {
 
-    // conversationId로 userId 조회
-    Conversation conversation = conversationRepository.findById(filteringRequest.conversationId())
-                .orElseThrow(() -> new NoSuchElementException("해당 ID의 채팅방을 찾을 수 없습니다: " + filteringRequest.conversationId()));
-        String userId = conversation.getUserId();
-    
+		// conversationId로 userId 조회
+		Conversation conversation = conversationRepository.findById(filteringRequest.conversationId())
+			.orElseThrow(() -> new NoSuchElementException(
+				"해당 ID의 채팅방을 찾을 수 없습니다: " + filteringRequest.conversationId()));
+		String userId = conversation.getUserId();
+
 		// 유저가 보낸 메시지 저장
 		saveMessage(filteringRequest.conversationId(), userId, Role.USER, filteringRequest.userMessage());
 
@@ -119,71 +117,6 @@ public class ProcessService {
 
 		log.info("Sent response via RabbitMQ for user: {}", userId);
 	}
-
-//	/**
-//	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다
-//	 * @param actions action, tag, message
-//	 */
-//	private void sendMessage(List<Actions> actions, String aiMessage) {
-//
-//		// 요청 헤더 설정 (JSON 형식)
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//		// 요청 본문 구성 (actions 안에 action, tag, message 포함)
-//		Map<String, Object> body = new ConcurrentHashMap<>();
-//		body.put("actions", actions);
-//		body.put("message", aiMessage);
-//
-//		// 요청 객체 생성
-//		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-//
-//		// 소켓 서버에 POST 요청
-//		ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
-//
-//		if (responseEntity.getStatusCode().is2xxSuccessful()) {
-//			System.out.println(responseEntity.getBody());
-//		} else {
-//			// TODO: 에러처리
-//			System.err.println(responseEntity.getBody());
-//		}
-//	}
-		// 소켓으로 메시지 전송
-		// TODO: chat 404 NOT FOUNT 에러 해결
-		// sendMessage(actions, aiMessage, userId);
-
-// 		return ProcessResponse.of(actions, userId, aiMessage);
-// 	}
-
-// 	/**
-// 	 * 소켓으로 수정된 html과 유저id, ai 응답 메시지를 보냅니다
-// 	 * @param actions action, tag, message
-// 	 */
-// 	private void sendMessage(List<Actions> actions, String aiMessage, String userId) {
-
-// 		// 요청 헤더 설정 (JSON 형식)
-// 		HttpHeaders headers = new HttpHeaders();
-// 		headers.setContentType(MediaType.APPLICATION_JSON);
-
-// 		// 요청 본문 구성 (actions 안에 action, tag, message 포함)
-// 		Map<String, Object> body = new ConcurrentHashMap<>();
-// 		body.put("actions", actions);
-// 		body.put("message", aiMessage);
-
-// 		// 요청 객체 생성
-// 		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
-
-// 		socketUrl += "/" + userId + "/message";
-// 		// 소켓 서버에 POST 요청
-// 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(socketUrl, request, String.class);
-
-// 		if (responseEntity.getStatusCode().is2xxSuccessful()) {
-// 			System.out.println(responseEntity.getBody());
-// 		} else {
-// 			// TODO: 에러처리
-// 			System.err.println(responseEntity.getBody());
-// 		}
-// 	}
 
 	/**
 	 * Message Document를 저장하는 메서드

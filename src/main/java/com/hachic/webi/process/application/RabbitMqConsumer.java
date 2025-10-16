@@ -25,11 +25,11 @@ public class RabbitMqConsumer {
 	 */
 	@RabbitListener(queues = RabbitMqConfig.REQUEST_QUEUE)
 	public void receiveRequest(ProcessRequest request) {
-		log.info("Received message via RabbitMQ for user: {}", request.userId());
+		log.info("Received message via RabbitMQ for user: {}", request.conversationId());
 		try {
 			processService.processHtml(request);
 		} catch (IOException e) {
-			log.error("Error processing message for user: {}. Details: {}", request.userId(), e.getMessage());
+			log.error("Error processing message for user: {}. Details: {}", request.conversationId(), e.getMessage());
 			// TODO: 에러 발생 시 처리 로직
 		}
 	}
