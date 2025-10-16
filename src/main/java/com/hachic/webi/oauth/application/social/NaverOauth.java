@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NaverOauth implements SocialOauth {
 	@Value("${sns.naver.url}")
-	private String naverSnsBaseUrl;
+	private String naverSnsUrl;
 	@Value("${sns.naver.client.id}")
 	private String naverSnsClientId;
 	@Value("${sns.naver.callback.url}")
@@ -29,7 +29,7 @@ public class NaverOauth implements SocialOauth {
 	@Value("${sns.naver.client.secret}")
 	private String naverSnsClientSecret;
 	@Value("${sns.naver.token.url}")
-	private String naverSnsTokenBaseUrl;
+	private String naverSnsTokenUrl;
 
 	@Override
 	public String getOauthRedirectUrl() {
@@ -43,7 +43,7 @@ public class NaverOauth implements SocialOauth {
 				.map(x -> x.getKey() + "=" + x.getValue())
 				.collect(Collectors.joining("&"));
 
-		return naverSnsBaseUrl + "?" + parameterString;
+		return naverSnsUrl + "?" + parameterString;
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class NaverOauth implements SocialOauth {
 		// HttpEntity에 헤더와 파라미터를 함께 담음
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
-		ResponseEntity<String> responseEntity = restTemplate.postForEntity(naverSnsTokenBaseUrl, request, String.class);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(naverSnsTokenUrl, request, String.class);
 
 		if (responseEntity.getStatusCode() == HttpStatus.OK) {
 			String tokenResponse = responseEntity.getBody();
@@ -72,6 +72,9 @@ public class NaverOauth implements SocialOauth {
 
 			return responseEntity.getBody();
 		}
-		return "NAVER 로그인 요청 처리 실패";
+		return String.format(
+				"Failed to process Naver login request. Status code: %s, Response Body: %s",
+				responseEntity.getStatusCode(), responseEntity.getBody()
+		);
 	}
 }

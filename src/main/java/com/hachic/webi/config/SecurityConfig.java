@@ -19,13 +19,22 @@ public class SecurityConfig {
 
 	@Value("${api.server.url}")
 	private String apiServerUrl;
+	@Value("${chrome.extension.url}")
+	private String chromeExtensionUrl;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 						// 소셜 로그인 엔드포인트와 swagger는 접근 허용
-						.requestMatchers("/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/docs/**").permitAll()
+						.requestMatchers("/auth/**",
+								"/swagger-ui/**",
+								"/v3/api-docs/**",
+								"/docs/**",
+								"/chat/**", // 테스트 임시 허용
+								"/process-html/**", // 테스트 임시 허용
+								"/**" // 임시 허용
+						).permitAll()
 						// 나머지 요청은 인증 요구
 						.anyRequest().authenticated()
 				)
@@ -42,7 +51,10 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOrigins(List.of(apiServerUrl));
+		config.setAllowedOrigins(List.of(
+				apiServerUrl,
+				"http://localhost:3000",
+				chromeExtensionUrl));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setAllowCredentials(true);
