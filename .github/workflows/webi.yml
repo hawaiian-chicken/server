@@ -13,6 +13,9 @@ jobs:
       NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
       NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
       KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+      RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
+      RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+      RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
     steps:
       # 소스코드 체크아웃
       - name: Checkout source code
@@ -39,6 +42,9 @@ jobs:
       NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
       NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
       KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+      RABBITMQ_HOST: ${{ secrets.RABBITMQ_HOST }}
+      RABBITMQ_USERNAME: ${{ secrets.RABBITMQ_USERNAME }}
+      RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
     needs: test
     if: github.event_name == 'push'
     steps:
@@ -110,6 +116,9 @@ jobs:
               -e NAVER_CLIENT_ID="${{ secrets.NAVER_CLIENT_ID }}" \
               -e NAVER_CLIENT_SECRET="${{ secrets.NAVER_CLIENT_SECRET }}" \
               -e KAKAO_CLIENT_ID="${{ secrets.KAKAO_CLIENT_ID }}" \
+              -e RABBITMQ_HOST="${{ secrets.RABBITMQ_HOST }}" \
+              -e RABBITMQ_USERNAME="${{ secrets.RABBITMQ_USERNAME }}" \
+              -e RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}" \
               --name spring-webi-container \
               ${{ secrets.DOCKER_USERNAME }}/spring-webi:latest
 
