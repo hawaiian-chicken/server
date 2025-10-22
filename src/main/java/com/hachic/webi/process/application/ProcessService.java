@@ -25,6 +25,7 @@ import com.hachic.webi.chat.dao.MessageRepository;
 import com.hachic.webi.chat.domain.Conversation;
 import com.hachic.webi.chat.domain.Message;
 import com.hachic.webi.chat.domain.Role;
+import com.hachic.webi.chat.dto.MessageHistory;
 import com.hachic.webi.config.RabbitMqConfig;
 import com.hachic.webi.process.dto.Actions;
 import com.hachic.webi.process.dto.ProcessRequest;
@@ -55,15 +56,17 @@ public class ProcessService {
 	 * @param filteringRequest webpage_id, message, user_id
 	 * @throws IOException 웹페이지 없는 경우, AI 응답 형식 벗어난 경우
 	 */
-	@SuppressWarnings("checkstyle:LineLength")
-	public void processHtml(ProcessRequest filteringRequest) throws IOException {
-// 	public ProcessResponse processHtml(ProcessRequest filteringRequest, String userId) throws IOException {
+	public ProcessResponse processHtml(ProcessRequest filteringRequest) throws IOException {
 
 		// conversationId로 userId 조회
 		Conversation conversation = conversationRepository.findById(filteringRequest.conversationId())
 			.orElseThrow(() -> new NoSuchElementException(
 				"해당 ID의 채팅방을 찾을 수 없습니다: " + filteringRequest.conversationId()));
 		String userId = conversation.getUserId();
+
+		ArrayList<MessageHistory> history = new ArrayList<>(
+				messageRepository.findAllByConversationId(filteringRequest.conversationId())
+						.stream().map(MessageHistory::from).toList());
 
 		// 유저가 보낸 메시지 저장
 		saveMessage(filteringRequest.conversationId(), userId, Role.USER, filteringRequest.userMessage());
@@ -77,13 +80,15 @@ public class ProcessService {
 		String originalHtml = webpageRepository
 				.findHtmlById(toObjectId(filteringRequest.webpageId())).orElseThrow().html();
 
-		// 요청 본문 구성 (html, userMessage 포함)
-		Map<String, String> body = new ConcurrentHashMap<>();
+		// 요청 본문 구성 (html, text, history 포함)
+		// TODO: 메시지 히스토리도 함께 전송
+		Map<String, Object> body = new ConcurrentHashMap<>();
 		body.put("html", originalHtml);
 		body.put("text", filteringRequest.userMessage());
+		body.put("history", history);
 
 		// 요청 객체 생성
-		HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+		HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
 		// AI 서버에 POST 요청
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(aiServerUrl, request, String.class);
@@ -116,6 +121,8 @@ public class ProcessService {
 		rabbitTemplate.convertAndSend(RabbitMqConfig.RESPONSE_QUEUE, finalResponse);
 
 		log.info("Sent response via RabbitMQ for user: {}", userId);
+
+		return finalResponse;
 	}
 
 	/**
