@@ -25,7 +25,7 @@ public class RabbitMqConsumer {
 	 */
 	@RabbitListener(queues = RabbitMqConfig.REQUEST_QUEUE)
 	public void receiveRequest(ProcessRequest request) {
-		log.info("Received message via RabbitMQ for user: {}", request.conversationId());
+		log.info("Received message via RabbitMQ for user: {}. {}", request.conversationId(), request);
 		try {
 			processService.processHtml(request);
 		} catch (IOException e) {
